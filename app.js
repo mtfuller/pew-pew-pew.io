@@ -1,15 +1,17 @@
-var express = require('express');
-var app = express();
-var test = require("./game_file");
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
+server.listen(3000);
 
 app.get('/', function (req, res) {
-  res.send(test.foo());
+  res.sendfile(__dirname + '/index.html');
 });
 
-app.get('/Wow', function (req, res) {
-  res.send('Wow!');
-});
-
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+io.on('connection', function (socket) {
+  socket.emit('connected', { hello: 'world' });
+  socket.on('input', function (data) {
+    console.log(data);
+    socket.emit('circle', { x: data.x, y: data.y });
+  });
 });

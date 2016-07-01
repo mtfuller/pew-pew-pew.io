@@ -7,29 +7,47 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 
+    var id = 0;
+
     var canvas = myCanvas;
     function getMousePos(canvas, evt) {
         var rect = canvas.getBoundingClientRect();
         return {
+            id: id,
             x: evt.clientX - rect.left,
             y: evt.clientY - rect.top
         };
     };
 
+
+
     var socket = io.connect('http://192.168.33.10:3000/');
     socket.on('connected', function (data) {
         $( "#myCanvas" ).mousemove(function(evt) {
-            console.log(data);
             socket.emit('input', getMousePos(canvas, evt));
         });
+
+        socket.on('authenticated', function (data) {
+            console.log(data);
+            id = data.id;
+        });
+
         socket.on('circle', function (data) {
             var c=document.getElementById("myCanvas");
             var ctx=c.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
-            ctx.arc(data.x,data.y,50,0,2*Math.PI);
+            ctx.arc(data.ent1.x,data.ent1.y,50,0,2*Math.PI);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(data.ent2.x,data.ent2.y,50,0,2*Math.PI);
             ctx.stroke();
         });
+
+        setInterval(function() {
+            socket.emit('update');
+        }, 20);
     });
 
 </script>

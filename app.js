@@ -6,8 +6,9 @@ var uuid = require('node-uuid');
 var number = 1;
 var entities = {};
 
-app.get('/', function (req, res) {
-    res.sendfile(__dirname + '/index.html');
+// Main Route
+app.get('/', function(req, res) {
+    res.sendfile(__dirname + '/view/index.html');
 });
 
 // Wait for incomming socket to connect
@@ -25,8 +26,10 @@ io.on('connection', function (socket) {
         //socket.emit('authenticated', { id: number });
         //number++;
 
-        // Add player
+        // Add player to game
 
+
+        // Wait for input from player
         socket.on('input', function (data) {
             if (entities.hasOwnProperty(data.id)) {
                 entities[data.id].x = data.x;
@@ -39,12 +42,21 @@ io.on('connection', function (socket) {
             }
         });
 
+        // When player asks for update
         socket.on('update', function () {
             socket.emit('circle', entities);
         });
     } else {
 
     };
+
+    // When User disconnects
+    socket.on('disconnect', function () {
+        socket.emit('disconnected');
+        delete entities[user_id];
+        console.log(entities);
+    });
+
 });
 
 server.listen(3000, function(){

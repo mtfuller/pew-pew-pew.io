@@ -1,0 +1,56 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+</head>
+<body>
+<canvas id="myCanvas" height="400px" width="600px" />
+<script src="/socket.io/socket.io.js"></script>
+<script>
+
+    var id = 0;
+
+    var canvas = myCanvas;
+    function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            id: id,
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+        };
+    };
+
+
+
+    var socket = io.connect('http://192.168.33.10:3000/');
+    socket.on('connected', function (data) {
+        $( "#myCanvas" ).mousemove(function(evt) {
+            socket.emit('input', getMousePos(canvas, evt));
+        });
+
+        id = data.id;
+
+        //socket.on('authenticated', function (data) {
+        //    console.log(data);
+        //    id = data.id;
+        //});
+
+        socket.on('circle', function (data) {
+            var c=document.getElementById("myCanvas");
+            var ctx=c.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var entity in data) {
+                var obj = data[entity];
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, 50, 0, 2*Math.PI);
+                ctx.stroke();
+            }
+        });
+
+        setInterval(function() {
+            socket.emit('update');
+        }, 20);
+    });
+
+</script>
+</body>
+</html>

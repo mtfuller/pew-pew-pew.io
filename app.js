@@ -2,6 +2,7 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var uuid = require('node-uuid');
+var hello = require('./game_core');
 
 var number = 1;
 var entities = {};
@@ -14,8 +15,9 @@ app.get('/', function(req, res) {
 // Wait for incomming socket to connect
 io.on('connection', function (socket) {
 
+
     var user_id = uuid.v1();
-    console.log(user_id);
+    console.log(socket.id);
 
     // Response that user has been connected
     socket.emit('connected', { id: user_id });

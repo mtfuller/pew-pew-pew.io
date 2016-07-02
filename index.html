@@ -36,13 +36,12 @@
             var c=document.getElementById("myCanvas");
             var ctx=c.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath();
-            ctx.arc(data.ent1.x,data.ent1.y,50,0,2*Math.PI);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(data.ent2.x,data.ent2.y,50,0,2*Math.PI);
-            ctx.stroke();
+            for (var entity in data) {
+                var obj = data[entity];
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, 50, 0, 2*Math.PI);
+                ctx.stroke();
+            }
         });
 
         setInterval(function() {

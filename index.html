@@ -27,10 +27,12 @@
             socket.emit('input', getMousePos(canvas, evt));
         });
 
-        socket.on('authenticated', function (data) {
-            console.log(data);
-            id = data.id;
-        });
+        id = data.id;
+
+        //socket.on('authenticated', function (data) {
+        //    console.log(data);
+        //    id = data.id;
+        //});
 
         socket.on('circle', function (data) {
             var c=document.getElementById("myCanvas");

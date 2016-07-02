@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "socket.io": "latest",
-    "express": "3.x"
+    "express": "3.x",
+    "node-uuid": "~1.4.7"
   }
 }

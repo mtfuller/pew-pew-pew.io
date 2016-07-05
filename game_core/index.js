@@ -12,6 +12,10 @@ var tester;
 var positionComp = require('./components/position-component.js');
 
 var positionSystem = require('./systems/position-system.js');
+var velocitySystem = require('./systems/velocity-system.js');
+
+var player = require('./entities/player.js');
+
 // GameManager
 
 var return_obj = {
@@ -23,7 +27,7 @@ var return_obj = {
     addEntity: function() {
         var entityId = Math.random().toString(36).substring(12);
         tester = entityId;
-        this.entities[entityId] = new entity.Entity(entityId);
+        this.entities[entityId] = new player.Player(entityId, 1, 100, 100, 20, 10);
     },
     addSystem: function(name, system) {
         if (name != null && !this.systems.hasOwnProperty(name)) {
@@ -36,8 +40,6 @@ var return_obj = {
     registerPlayer: function() {},
     subscribeEntityToSystem: function(entityId, systemName) {
         this.systems[systemName].addEntity(entityId);
-        var newComp = new positionComp.positionComponent(22,22);
-        this.entities[entityId].addComponent(newComp);
     },
     updateGame: function() {
         for (system in this.systems) {
@@ -50,11 +52,17 @@ var return_obj = {
 
 return_obj.addEntity();
 return_obj.addSystem("Position", positionSystem);
+return_obj.addSystem("Velocity", velocitySystem);
 return_obj.subscribeEntityToSystem(tester, "Position");
+return_obj.subscribeEntityToSystem(tester, "Velocity");
 
-console.log(return_obj);
+console.log(return_obj.entities[tester]);
+
+console.log("=============================================================");
 
 return_obj.updateGame();
+
+console.log(return_obj.entities[tester]);
 
 
 

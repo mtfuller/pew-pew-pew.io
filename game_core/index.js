@@ -22,12 +22,15 @@ var return_obj = {
     entities: {},
     systems: {},
     setupGame: function() {
-
+        this.addSystem("Position", positionSystem);
+        this.addSystem("Velocity", velocitySystem);
     },
     addEntity: function() {
         var entityId = Math.random().toString(36).substring(12);
         tester = entityId;
         this.entities[entityId] = new player.Player(entityId, 1, 100, 100, 20, 10);
+        this.subscribeEntityToSystem(entityId, "Position");
+        this.subscribeEntityToSystem(entityId, "Velocity");
     },
     addSystem: function(name, system) {
         if (name != null && !this.systems.hasOwnProperty(name)) {
@@ -47,96 +50,20 @@ var return_obj = {
                 this.systems[system].update(this.entities[this.systems[system].entities[i]]);
             }
         }
-    }
-}
-
-return_obj.addEntity();
-return_obj.addSystem("Position", positionSystem);
-return_obj.addSystem("Velocity", velocitySystem);
-return_obj.subscribeEntityToSystem(tester, "Position");
-return_obj.subscribeEntityToSystem(tester, "Velocity");
-
-console.log(return_obj.entities[tester]);
-
-console.log("=============================================================");
-
-return_obj.updateGame();
-
-console.log(return_obj.entities[tester]);
-
-
-
-/*
-
-entity = {
-    id: XXXXX
-    Components: {
-        position: {
-            x: 123,
-            y: 123
-        },
-        velocity: {
-            angle: 23.4,
-            velocity: 0.28
+    },
+    getClientData: function() {
+        var retArr = [];
+        for (entity in this.entities) {
+            var obj = {
+                x: this.entities[entity].components.Position.x,
+                y: this.entities[entity].components.Position.y,
+                theta: this.entities[entity].components.Velocity.theta,
+                speed: this.entities[entity].components.Velocity.velocity
+            }
+            retArr.push(obj);
         }
+        return {data: retArr};
     }
 }
 
-GameManager = {
-    Entities: {
-        obj1: {
-            id: XXXXX
-            Components: {
-                position: {
-                    x: 123,
-                    y: 123
-                },
-                velocity: {
-                    angle: 23.4,
-                    velocity: 0.28
-                }
-            }
-        },
-        obj2 = {}
-    },
-    Systems: {
-        System1: {
-            subscribed_entities: [obj1, obj2]
-            paused: false
-            init: function(x) {
-                x.Components.position = {
-                    x: 123,
-                    y: 123
-                }
-            }
-            update: function(x) {
-                x.Components.position.x += 1
-                x.Components.position.y += 1
-            }
-        },
-        System2: {
-            subscribed_entities: [obj1]
-            paused: false
-            update: function() {
-
-            }
-        }
-    },
-    setupGame: function() {
-
-    },
-    registerPlayer: function() {
-
-    }
-}
-*/
-
-
-
-// Helper Methods
-    // addSystem()
-    // p
-
-// API Methods
-    // module.exports.setupGame = function(config) {}
-    // module.exports.registerPlayer = function(id) {}
+module.exports = return_obj;

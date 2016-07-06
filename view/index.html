@@ -34,6 +34,7 @@
         //    id = data.id;
         //});
 
+/*
         socket.on('circle', function (data) {
             var c=document.getElementById("myCanvas");
             var ctx=c.getContext("2d");
@@ -42,6 +43,44 @@
                 var obj = data[entity];
                 ctx.beginPath();
                 ctx.arc(obj.x, obj.y, 50, 0, 2*Math.PI);
+                ctx.stroke();
+            }
+        });
+*/
+        socket.on('render', function (data) {
+            var c=document.getElementById("myCanvas");
+            var ctx=c.getContext("2d");
+            ctx.lineWidth=5;
+            ctx.lineJoin="round";
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle="#000000";
+            ctx.rect(0, 0, canvas.width, canvas.height);
+            ctx.fill();
+            ctx.strokeStyle="#00FF00";
+            for (i = 0; i < data.data.length; i++) {
+                var obj = data.data[i];
+
+                var theta = obj.theta;
+                var radius = 35;
+                var radiansToDegrees = Math.PI / 180.0 ;
+                var x = obj.x;
+                var y = obj.y;
+
+                var pointA_x = x + (radius * Math.cos(theta * radiansToDegrees));
+                var pointA_y = y + (radius * Math.sin(theta * radiansToDegrees));
+
+                var pointB_x = x + (radius * Math.cos((theta + 140) * radiansToDegrees));
+                var pointB_y = y + (radius * Math.sin((theta + 140) * radiansToDegrees));
+
+                var pointC_x = x + (radius * Math.cos((theta + 220) * radiansToDegrees));
+                var pointC_y = y + (radius * Math.sin((theta + 220) * radiansToDegrees));
+
+                ctx.beginPath();
+                ctx.moveTo(pointA_x, pointA_y);
+                ctx.lineTo(pointB_x, pointB_y);
+                ctx.lineTo(pointC_x, pointC_y);
+                ctx.lineTo(pointA_x, pointA_y);
+                ctx.lineTo(pointB_x, pointB_y);
                 ctx.stroke();
             }
         });

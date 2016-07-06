@@ -47,6 +47,7 @@ io.on('connection', function (socket) {
         // When player asks for update
         socket.on('update', function () {
             socket.emit('circle', entities);
+            socket.emit('render', hello.getClientData());
         });
     } else {
 
@@ -65,4 +66,6 @@ server.listen(3000, function(){
   console.log('SERVER START - Serving on port 3000')
   // Server START
   // Setup Game
+  hello.setupGame();
+  hello.addEntity();
 });

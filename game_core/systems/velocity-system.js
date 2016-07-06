@@ -11,7 +11,11 @@ velocity.addEntity = function(entity_name) {
 }
 
 velocity.update = function(name) {
-    name.components.Velocity.theta = 20;
+    if (name.components.Velocity.theta >= 360) {
+        name.components.Velocity.theta = 0;
+    } else {
+        name.components.Velocity.theta += 1;
+    }
     name.components.Velocity.velocity = 15;
 }
 

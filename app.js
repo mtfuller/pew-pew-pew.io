@@ -68,4 +68,5 @@ server.listen(3000, function(){
   // Setup Game
   hello.setupGame();
   hello.addEntity();
+  hello.startGame();
 });

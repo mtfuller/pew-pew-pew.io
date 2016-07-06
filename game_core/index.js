@@ -67,3 +67,8 @@ var return_obj = {
 }
 
 module.exports = return_obj;
+
+module.exports.startGame = function() {
+    this.updateGame();
+    setTimeout(function(){ return_obj.startGame(); }, 20);
+}

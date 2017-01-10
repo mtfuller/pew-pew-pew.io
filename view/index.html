@@ -66,7 +66,11 @@
         });
 
         setInterval(function() {
-            render();
+          if (isRegistered) {
+            renderGame();
+          } else {
+            renderLoading();
+          }
         }, 20);
     });
 
@@ -94,8 +98,20 @@
       };
     }
 
+    function renderLoading() {
+      var c=document.getElementById("myCanvas");
+      var ctx=c.getContext("2d");
+      ctx.fillStyle="#000000";
+      ctx.rect(0, 0, canvas.width, canvas.height);
+      ctx.fill();
+      ctx.font = "30px Lucida Console";
+      ctx.fillStyle = "#00FF00";
+      ctx.textAlign = "center";
+      ctx.fillText("Loading...", canvas.width/2, canvas.height/2);
+    }
+
     // Render
-    function render() {
+    function renderGame() {
       var c=document.getElementById("myCanvas");
       var ctx=c.getContext("2d");
       ctx.lineWidth=5;
@@ -110,8 +126,8 @@
           var theta = obj.theta;
           var radius = 35;
           var radiansToDegrees = Math.PI / 180.0 ;
-          var x = obj.x * .5 + (canvas.width / 2);
-          var y = obj.y * .5 + (canvas.height / 2);
+          var x = obj.x + (canvas.width / 2);
+          var y = obj.y + (canvas.height / 2);
 
           var pointA_x = x + (radius * Math.cos(theta * radiansToDegrees));
           var pointA_y = y + (radius * Math.sin(theta * radiansToDegrees));

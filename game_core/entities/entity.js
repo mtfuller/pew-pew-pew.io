@@ -1,6 +1,9 @@
 var Entity = function(id) {
     this.id = id;
     this.components = {};
+    this.getComponent = function(name) {
+      return this.components[name];
+    }
 }
 
 module.exports.Entity = Entity;

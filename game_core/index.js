@@ -26,7 +26,9 @@ var return_obj = {
     },
     addEntity: function(entityId) {
         //var entityId = Math.random().toString(36).substring(12);
-        this.entities[entityId] = new player.Player(entityId, 1, 100, 100, 20, 10);
+        var x = Math.round(Math.random() * 1001);
+        var y = Math.round(Math.random() * 501)
+        this.entities[entityId] = new player.Player(entityId, 1, x, y, 20, 10);
         this.subscribeEntityToSystem(entityId, "Position");
         this.subscribeEntityToSystem(entityId, "Velocity");
     },
@@ -34,6 +36,9 @@ var return_obj = {
       delete this.entities[entityId];
       this.unsubscribeEntityToSystem(entityId, "Position");
       this.unsubscribeEntityToSystem(entityId, "Velocity");
+    },
+    getEntity: function(entityId) {
+      return this.entities[entityId];
     },
     addSystem: function(name, system) {
         if (name != null && !this.systems.hasOwnProperty(name)) {
@@ -57,18 +62,20 @@ var return_obj = {
             }
         }
     },
-    getClientData: function() {
+    getClientData: function(user_id) {
         var retArr = [];
+        var playerEntityPos = this.entities[user_id].getComponent("Position");
         for (entity in this.entities) {
             var obj = {
-                x: this.entities[entity].components.Position.x,
-                y: this.entities[entity].components.Position.y,
-                theta: this.entities[entity].components.Velocity.theta,
-                speed: this.entities[entity].components.Velocity.velocity
+                x: this.entities[entity].components.Position.x - playerEntityPos.x,
+                y: this.entities[entity].components.Position.y - playerEntityPos.y,
+                theta: this.entities[entity].components.Velocity.theta
             }
             retArr.push(obj);
         }
-        return {data: retArr};
+        return {
+          data: retArr
+        };
     }
 }
 

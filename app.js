@@ -31,25 +31,21 @@ io.on('connection', function (socket) {
           // Add player to game
           pew_game_engine.addEntity(user_id);
 
+          console.log(pew_game_engine.getEntity(user_id).getComponent("Position"));
+
           // Tell user that they can begin to play
           socket.emit('authenticated', { id: user_id });
 
           // Wait for input from player
           socket.on('input', function (data) {
-              if (entities.hasOwnProperty(data.id)) {
-                  entities[data.id].x = data.x;
-                  entities[data.id].y = data.y;
-              } else {
-                  entities[data.id] = {
-                      x: data.x,
-                      y: data.y
-                  }
-              }
+              var vel = pew_game_engine.getEntity(user_id).getComponent("Velocity");
+              vel.theta = data.theta;
           });
 
           // When player asks for update
           socket.on('update', function () {
-              socket.emit('game_data', pew_game_engine.getClientData());
+              
+              socket.emit('game_data', pew_game_engine.getClientData(user_id));
           });
         } else {
           socket.disconnect();

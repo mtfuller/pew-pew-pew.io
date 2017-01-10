@@ -9,6 +9,14 @@
 
     var id = 0;
 
+    var entities = [
+      {
+        x: 27,
+        y: 65,
+        theta: 0
+      }
+    ];
+
     var canvas = myCanvas;
     function getMousePos(canvas, evt) {
         var rect = canvas.getBoundingClientRect();
@@ -20,75 +28,105 @@
     };
 
 
+    // connect to game
+    var socket = io.connect('http://localhost:8080/');
+    var isRegistered = false;
 
-    var socket = io.connect('http://192.168.33.10:3000/');
+    // wait for connected
     socket.on('connected', function (data) {
-        $( "#myCanvas" ).mousemove(function(evt) {
-            socket.emit('input', getMousePos(canvas, evt));
-        });
+        console.log("Client is connected to server.");
 
-        id = data.id;
+        askToRegister();
+        console.log("Trying to register for a player...");
 
-        //socket.on('authenticated', function (data) {
-        //    console.log(data);
-        //    id = data.id;
-        //});
+        socket.on('authenticated', function (data) {
+            isRegistered = true;
+            id = data.id;
+            console.log("Client is authenticated!\nCLIENT ID:"+id);
 
-/*
-        socket.on('circle', function (data) {
-            var c=document.getElementById("myCanvas");
-            var ctx=c.getContext("2d");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (var entity in data) {
-                var obj = data[entity];
-                ctx.beginPath();
-                ctx.arc(obj.x, obj.y, 50, 0, 2*Math.PI);
-                ctx.stroke();
-            }
-        });
-*/
-        socket.on('render', function (data) {
-            var c=document.getElementById("myCanvas");
-            var ctx=c.getContext("2d");
-            ctx.lineWidth=5;
-            ctx.lineJoin="round";
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle="#000000";
-            ctx.rect(0, 0, canvas.width, canvas.height);
-            ctx.fill();
-            ctx.strokeStyle="#00FF00";
-            for (i = 0; i < data.data.length; i++) {
-                var obj = data.data[i];
+            $( "#myCanvas" ).mousemove(function(evt) {
+                //socket.emit('input', getMousePos(canvas, evt));
+                getPlayerInput(canvas, evt);
+            });
 
-                var theta = obj.theta;
-                var radius = 35;
-                var radiansToDegrees = Math.PI / 180.0 ;
-                var x = obj.x;
-                var y = obj.y;
+            socket.on('game_data', function (data) {
+                //entities = data.data;
+            });
 
-                var pointA_x = x + (radius * Math.cos(theta * radiansToDegrees));
-                var pointA_y = y + (radius * Math.sin(theta * radiansToDegrees));
-
-                var pointB_x = x + (radius * Math.cos((theta + 140) * radiansToDegrees));
-                var pointB_y = y + (radius * Math.sin((theta + 140) * radiansToDegrees));
-
-                var pointC_x = x + (radius * Math.cos((theta + 220) * radiansToDegrees));
-                var pointC_y = y + (radius * Math.sin((theta + 220) * radiansToDegrees));
-
-                ctx.beginPath();
-                ctx.moveTo(pointA_x, pointA_y);
-                ctx.lineTo(pointB_x, pointB_y);
-                ctx.lineTo(pointC_x, pointC_y);
-                ctx.lineTo(pointA_x, pointA_y);
-                ctx.lineTo(pointB_x, pointB_y);
-                ctx.stroke();
-            }
+            setInterval(function() {
+                socket.emit('update', {});
+            }, 20);
         });
 
         setInterval(function() {
-            socket.emit('update');
+            render();
         }, 20);
     });
+
+    // Ask server to play the game
+    function askToRegister() {
+        socket.emit('register', {name: "Test"});
+        setTimeout(function() {
+          if (!isRegistered) {
+            askToRegister();
+          }
+        }, 50);
+    }
+
+    // Get mouse input
+    function getPlayerInput(canvas, evt) {
+      var screen = canvas.getBoundingClientRect();
+      var x = (evt.clientX - screen.left) - (screen.width / 2);
+      var y = (evt.clientY - screen.top) - (screen.height / 2);
+      var new_theta = Math.round(Math.atan2(y,x)*(180/Math.PI));
+      if (new_theta < 0) Math.abs(new_theta += 360);
+      if (new_theta == -0) new_theta = 0;
+      entities[0] = {
+          id: id,
+          x: (screen.width / 2),
+          y: (screen.height / 2),
+          theta: new_theta
+      };
+    }
+
+    // Render
+    function render() {
+      var c=document.getElementById("myCanvas");
+      var ctx=c.getContext("2d");
+      ctx.lineWidth=5;
+      ctx.lineJoin="round";
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle="#000000";
+      ctx.rect(0, 0, canvas.width, canvas.height);
+      ctx.fill();
+      ctx.strokeStyle="#00FF00";
+      for (i = 0; i < entities.length; i++) {
+          var obj = entities[i];
+
+          var theta = obj.theta;
+          var radius = 35;
+          var radiansToDegrees = Math.PI / 180.0 ;
+          var x = obj.x;
+          var y = obj.y;
+
+          var pointA_x = x + (radius * Math.cos(theta * radiansToDegrees));
+          var pointA_y = y + (radius * Math.sin(theta * radiansToDegrees));
+
+          var pointB_x = x + (radius * Math.cos((theta + 140) * radiansToDegrees));
+          var pointB_y = y + (radius * Math.sin((theta + 140) * radiansToDegrees));
+
+          var pointC_x = x + (radius * Math.cos((theta + 220) * radiansToDegrees));
+          var pointC_y = y + (radius * Math.sin((theta + 220) * radiansToDegrees));
+
+          ctx.beginPath();
+          ctx.moveTo(pointA_x, pointA_y);
+          ctx.lineTo(pointB_x, pointB_y);
+          ctx.lineTo(pointC_x, pointC_y);
+          ctx.lineTo(pointA_x, pointA_y);
+          ctx.lineTo(pointB_x, pointB_y);
+          ctx.stroke();
+      }
+    }
 
 </script>
 </body>

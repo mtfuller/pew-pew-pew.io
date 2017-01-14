@@ -28,7 +28,7 @@ var return_obj = {
         //var entityId = Math.random().toString(36).substring(12);
         var x = Math.round(Math.random() * 1001);
         var y = Math.round(Math.random() * 501)
-        this.entities[entityId] = new player.Player(entityId, 1, x, y, 20, 10);
+        this.entities[entityId] = new player.Player(entityId, 1, x, y, 20, 5);
         this.subscribeEntityToSystem(entityId, "Position");
         this.subscribeEntityToSystem(entityId, "Velocity");
     },

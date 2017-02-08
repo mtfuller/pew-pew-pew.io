@@ -8,33 +8,31 @@
 
 var entity = require('./entities/entity.js');
 
-var positionComp = require('./components/position-component.js');
 
-var positionSystem = require('./systems/position-system.js');
 var velocitySystem = require('./systems/velocity-system.js');
 
 var player = require('./entities/player.js');
 
 // GameManager
 var return_obj = {
+    config_data: {
+        universe_width: 1000,
+        universe_height: 500
+    },
     entities: {},
     systems: {},
     setupGame: function() {
         console.log('Game is setup!')
-        this.addSystem("Position", positionSystem);
-        this.addSystem("Velocity", velocitySystem);
+        this.addSystem("Velocity", new velocitySystem.VelocitySystem(this.config_data));
     },
     addEntity: function(entityId) {
-        //var entityId = Math.random().toString(36).substring(12);
         var x = Math.round(Math.random() * 1001);
         var y = Math.round(Math.random() * 501)
         this.entities[entityId] = new player.Player(entityId, 1, x, y, 20, 5);
-        this.subscribeEntityToSystem(entityId, "Position");
         this.subscribeEntityToSystem(entityId, "Velocity");
     },
     removeEntity: function(entityId) {
       delete this.entities[entityId];
-      this.unsubscribeEntityToSystem(entityId, "Position");
       this.unsubscribeEntityToSystem(entityId, "Velocity");
     },
     getEntity: function(entityId) {
@@ -56,6 +54,7 @@ var return_obj = {
         this.systems[systemName].removeEntity(entityId);
     },
     updateGame: function() {
+        console.log(this.systems);
         for (system in this.systems) {
             for (i = 0; i < this.systems[system].entities.length; i++) {
                 this.systems[system].update(this.entities[this.systems[system].entities[i]]);

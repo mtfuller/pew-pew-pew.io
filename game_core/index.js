@@ -8,7 +8,6 @@
 
 var entity = require('./entities/entity.js');
 
-
 var velocitySystem = require('./systems/velocity-system.js');
 
 var player = require('./entities/player.js');
@@ -16,7 +15,7 @@ var player = require('./entities/player.js');
 // GameManager
 var return_obj = {
     config_data: {
-        universe_width: 1000,
+        universe_width: 500,
         universe_height: 500
     },
     entities: {},
@@ -54,7 +53,6 @@ var return_obj = {
         this.systems[systemName].removeEntity(entityId);
     },
     updateGame: function() {
-        console.log(this.systems);
         for (system in this.systems) {
             for (i = 0; i < this.systems[system].entities.length; i++) {
                 this.systems[system].update(this.entities[this.systems[system].entities[i]]);

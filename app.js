@@ -1,11 +1,16 @@
+// =============================================================================
+// Author:  Thomas Fuller
+// File:    app.js
+// =============================================================================
+// Description:
+//
+// =============================================================================
+
 var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server, {'pingInterval': 2000, 'pingTimeout': 5000});
 var uuid = require('uuid');
 var pew_game_engine = require('./game_core');
-
-var number = 1;
-var entities = {};
 
 // Main Route
 app.get('/', function(req, res) {
@@ -23,7 +28,8 @@ io.on('connection', function (socket) {
 
     console.log(Object.keys(io.sockets.sockets));
 
-    socket.on('register', function (data) {
+    // Wait for client to send a request to join for the game
+    socket.on('join', function (data) {
       if (new Date().getTime() - conn_time <= 5000) return;
 
       // Validate User
@@ -44,7 +50,7 @@ io.on('connection', function (socket) {
 
           // When player asks for update
           socket.on('update', function () {
-              
+
               socket.emit('game_data', pew_game_engine.getClientData(user_id));
           });
         } else {

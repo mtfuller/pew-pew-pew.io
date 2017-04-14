@@ -38,17 +38,17 @@
 
     // connect to game
     var socket = io.connect('http://localhost:8080/');
-    var isRegistered = false;
+    var hasJoined = false;
 
     // wait for connected
     socket.on('connected', function (data) {
         console.log("Client is connected to server.");
 
-        askToRegister();
-        console.log("Trying to register for a player...");
+        askToJoin();
+        console.log("Trying to join for a player...");
 
         socket.on('authenticated', function (data) {
-            isRegistered = true;
+            hasJoined = true;
             id = data.id;
             console.log("Client is authenticated!\nCLIENT ID:"+id);
 
@@ -66,7 +66,7 @@
         });
 
         setInterval(function() {
-          if (isRegistered) {
+          if (hasJoined) {
             renderGame();
           } else {
             renderLoading();
@@ -75,11 +75,11 @@
     });
 
     // Ask server to play the game
-    function askToRegister() {
-        socket.emit('register', {name: "Test"});
+    function askToJoin() {
+        socket.emit('join', {name: "Test"});
         setTimeout(function() {
-          if (!isRegistered) {
-            askToRegister();
+          if (!hasJoined) {
+            askToJoin();
           }
         }, 50);
     }

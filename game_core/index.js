@@ -29,6 +29,64 @@ var game_manager = {
     systems: {},      // Holds all currently-running game systems
 
     // =========================================================================
+    // Spatial HashMap
+    // =========================================================================
+    spatialHashMap: {
+      cell_size: 10,
+      cell_width: 100,
+      cell_height: 100,
+      hashMap2d: [],
+      init: function() {
+        this.cell_height = game_manager.config_data.universe_height / this.cell_size;
+        this.cell_width = game_manager.config_data.universe_width / this.cell_size;
+        this.hashMap2d = new Array(this.cell_size*this.cell_size);
+        for (var i=0; i<this.hashMap2d.length; i++) {
+          this.hashMap2d[i] = [];
+        }
+      },
+      hash: function(x,y) {
+        x = Math.round(x / this.cell_width);
+        y = Math.round(y / this.cell_height);
+        return (y*this.cell_size + x);
+      },
+      addEntity: function(entityId, i) {
+        this.hashMap2d[i].push(entityId);
+      },
+      removeEntity: function(entityId, i) {
+        var t = this.hashMap2d[i].indexOf(entityId)
+        this.hashMap2d[i].splice(t,1);
+      },
+      getEntitiesNearPlayer: function(entity) {
+        var entities = [];
+        x = Math.round(entity.components.Position.x / this.cell_width);
+        y = Math.round(entity.components.Position.y / this.cell_width);
+        var posX = [-1,0,1];
+        var posY = [-1,0,1];
+        if (x == 0) {
+          var i = posX.indexOf(-1);
+          posx[i] = cell_size - 1;
+        } else if (x == cell_size - 1) {
+          var i = posX.indexOf(1);
+          posx[i] = 0;
+        }
+        if (y == 0) {
+          var i = posY.indexOf(-1);
+          posx[i] = cell_size - 1;
+        } else if (y == cell_size - 1) {
+          var i = posY.indexOf(1);
+          posx[i] = 0;
+        }
+        posX.forEach(function(ix) {
+          posY.forEach(function(iy) {
+            this.hashMap2d[((y+iy)*cell_size + (x+ix))].forEach(function(iz) {
+              entities.push(iz);
+            })
+          });
+        });
+      }
+    },
+
+    // =========================================================================
     // void setupGame()
     // =========================================================================
     // Description:
@@ -36,10 +94,11 @@ var game_manager = {
     // =========================================================================
     setupGame: function() {
         console.log('Game is setup!')
+        this.spatialHashMap.init();
         this.addSystem("Velocity",
-          new velocitySystem.VelocitySystem(this.config_data));
+          new velocitySystem.VelocitySystem(this));
         this.addSystem("Collision",
-          new collisionSystem.CollisionSystem(this.config_data));
+          new collisionSystem.CollisionSystem(this));
     },
 
     // =========================================================================
@@ -126,9 +185,9 @@ var game_manager = {
     // =========================================================================
     updateGame: function() {
         for (system in this.systems) {
-            for (i = 0; i < this.systems[system].entities.length; i++) {
-                this.systems[system].update(this.entities[this.systems[system].entities[i]]);
-            }
+          for (entity in this.systems[system].entities) {
+            this.systems[system].update(this.entities[this.systems[system].entities[entity]]);
+          }
         }
     },
 

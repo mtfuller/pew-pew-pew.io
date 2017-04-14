@@ -14,12 +14,12 @@ var system = require('./system.js');
 // =============================================================================
 var velocity = {};
 
-velocity.VelocitySystem = function(config_data) {
+velocity.VelocitySystem = function(game_manager) {
   var velocityObj = new system.System("Velocity");
   velocityObj.MIN_X = 0;
   velocityObj.MIN_Y = 0;
-  velocityObj.MAX_X = config_data.universe_width;
-  velocityObj.MAX_Y = config_data.universe_height;
+  velocityObj.MAX_X = game_manager.config_data.universe_width;
+  velocityObj.MAX_Y = game_manager.config_data.universe_height;
 
   // Initialization of the velocity system
   velocityObj.init = function() {
@@ -28,6 +28,11 @@ velocity.VelocitySystem = function(config_data) {
 
   // Updates the position of all entities, based off their currrent velocity
   velocityObj.update = function(name) {
+      var old_hash_index = game_manager.spatialHashMap.hash(
+        name.components.Position.x,
+        name.components.Position.y
+      );
+
       // Move entity's x position using their speed and direction
       name.components.Position.x += Math.round(name.components.Velocity.velocity
         * Math.cos(name.components.Velocity.theta * (Math.PI / 180)));
@@ -47,6 +52,16 @@ velocity.VelocitySystem = function(config_data) {
         name.components.Position.y = velocityObj.MIN_Y
       } else if (name.components.Position.y < velocityObj.MIN_Y) {
         name.components.Position.y = velocityObj.MAX_Y
+      }
+
+      var new_hash_index = game_manager.spatialHashMap.hash(
+        name.components.Position.x,
+        name.components.Position.y
+      );
+
+      if (old_hash_index != new_hash_index) {
+        game_manager.spatialHashMap.removeEntity(name.id, old_hash_index);
+        game_manager.spatialHashMap.addEntity(name.id, new_hash_index);
       }
   }
   return velocityObj

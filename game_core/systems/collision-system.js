@@ -14,53 +14,12 @@ var system = require('./system.js');
 // =============================================================================
 var collision = {};
 
-collision.CollisionSystem = function(config_data) {
+collision.CollisionSystem = function(game_manager) {
   var cell_size = 10;
-  var cell_height = config_data.universe_height / cell_size;
-  var cell_width = config_data.universe_width / cell_size;
+  var cell_height = game_manager.config_data.universe_height / cell_size;
+  var cell_width = game_manager.config_data.universe_width / cell_size;
 
   var collisionObj = new system.System("Collision");
-
-  // Initialize the spatial hashmap
-  collisionObj.hashMap2d = new Array(cell_size*cell_size);
-  for (var i=0; i<cell_size*cell_size; i++) {
-    collisionObj.hashMap2d[i] = [];
-  }
-
-  collisionObj.hash = function(x,y) {
-    x = Math.round(x / cell_width);
-    y = Math.round(y / cell_height);
-    return (y*cell_size + x);
-  };
-
-  collisionObj.getEntitiesNearPlayer = function(entity) {
-    var entities = [];
-    x = Math.round(entity.components.Position.x / cell_width);
-    y = Math.round(entity.components.Position.y / cell_width);
-    var posX = [-1,0,1];
-    var posY = [-1,0,1];
-    if (x == 0) {
-      var i = posX.indexOf(-1);
-      posx[i] = cell_size - 1;
-    } else if (x == cell_size - 1) {
-      var i = posX.indexOf(1);
-      posx[i] = 0;
-    }
-    if (y == 0) {
-      var i = posY.indexOf(-1);
-      posx[i] = cell_size - 1;
-    } else if (y == cell_size - 1) {
-      var i = posY.indexOf(1);
-      posx[i] = 0;
-    }
-    posX.forEach(function(ix) {
-      posY.forEach(function(iy) {
-        this.hashMap2d[((y+iy)*cell_size + (x+ix))].forEach(function(iz) {
-          entities.push(iz);
-        })
-      });
-    });
-  };
 
   // Initialization of the velocity system
   collisionObj.init = function() {
@@ -69,9 +28,17 @@ collision.CollisionSystem = function(config_data) {
 
   // Checks for a collision between multiple entities
   collisionObj.update = function(name) {
-    console.table(this.hashMap2d);
+    var s = "";
+    for (var i=0; i<cell_size; i++) {
+      for (var j=0; j<cell_size; j++) {
+        s += "["+this.hashMap2d[(i*cell_size + j)] + "] ";
+      }
+      s += "\n";
+    }
+    console.log(s);
   }
-  return collision
+
+  return collisionObj;
 }
 
 module.exports = collision;

@@ -12,6 +12,7 @@ var player = require('./entities/player.js');
 
 // Define Systems
 var velocitySystem = require('./systems/velocity-system.js');
+var collisionSystem = require('./systems/collision-system.js');
 
 // =============================================================================
 // Game Manager object
@@ -37,6 +38,8 @@ var game_manager = {
         console.log('Game is setup!')
         this.addSystem("Velocity",
           new velocitySystem.VelocitySystem(this.config_data));
+        this.addSystem("Collision",
+          new collisionSystem.CollisionSystem(this.config_data));
     },
 
     // =========================================================================
@@ -51,6 +54,7 @@ var game_manager = {
         var y = Math.round(Math.random() * 501)
         this.entities[entityId] = new player.Player(entityId, 1, x, y, 20, 5);
         this.subscribeEntityToSystem(entityId, "Velocity");
+        this.subscribeEntityToSystem(entityId, "Collision");
     },
 
     // =========================================================================
@@ -63,6 +67,7 @@ var game_manager = {
     removeEntity: function(entityId) {
       delete this.entities[entityId];
       this.unsubscribeEntityToSystem(entityId, "Velocity");
+      this.unsubscribeEntityToSystem(entityId, "Collision");
     },
 
     // =========================================================================

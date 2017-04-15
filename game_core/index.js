@@ -35,7 +35,7 @@ var game_manager = {
       cell_size: 10,
       cell_width: 100,
       cell_height: 100,
-      hashMap2d: [],
+      hashMap2d: new Array(),
       init: function() {
         this.cell_height = game_manager.config_data.universe_height / this.cell_size;
         this.cell_width = game_manager.config_data.universe_width / this.cell_size;
@@ -45,11 +45,15 @@ var game_manager = {
         }
       },
       hash: function(x,y) {
-        x = Math.round(x / this.cell_width);
-        y = Math.round(y / this.cell_height);
+        x = Math.floor(x / this.cell_width);
+        y = Math.floor(y / this.cell_height);
+        console.log("(x,y) = "+x+", "+y);
         return (y*this.cell_size + x);
       },
       addEntity: function(entityId, i) {
+        console.log("most recent:");
+        console.log("i: "+i);
+        console.log(this.hashMap2d[i]);
         this.hashMap2d[i].push(entityId);
       },
       removeEntity: function(entityId, i) {

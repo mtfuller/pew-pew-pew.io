@@ -10,7 +10,7 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server, {'pingInterval': 2000, 'pingTimeout': 5000});
 var uuid = require('uuid');
-var pew_game_engine = require('./game_core');
+var pew_game_engine = require('./game');
 
 // Main Route
 app.get('/', function(req, res) {

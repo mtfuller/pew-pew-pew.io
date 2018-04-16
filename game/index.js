@@ -7,7 +7,7 @@
 // =============================================================================
 
 // Define Entities
-var entity = require('./entities/entity.js');
+var entity = require('../lib/entity-component-system/entity.js');
 var player = require('./entities/player.js');
 
 // Define Systems

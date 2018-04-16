@@ -7,7 +7,7 @@
 // =============================================================================
 
 // Import base object
-var component = require('./component.js');
+var component = require('../../lib/entity-component-system/component.js');
 
 // =============================================================================
 // Position Component

@@ -7,7 +7,7 @@
 // =============================================================================
 
 // Importing necessary files
-var entity = require('./entity.js');
+var entity = require('../../lib/entity-component-system/entity.js');
 var position = require('../components/position-component.js');
 var velocity = require('../components/velocity-component.js');
 
@@ -24,6 +24,6 @@ var newPlayer = function(id, user_id, x_pos, y_pos, theta, speed) {
     newPlayer.addComponent(velocityComponent);
 
     return newPlayer;
-}
+};
 
 module.exports.Player = newPlayer;

@@ -7,7 +7,7 @@
 // =============================================================================
 
 // Import System base object
-var system = require('./system.js');
+var system = require('../../lib/entity-component-system/system.js');
 
 // =============================================================================
 // Velocity System

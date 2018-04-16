@@ -9,7 +9,7 @@
 var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server, {'pingInterval': 2000, 'pingTimeout': 5000});
-var uuid = require('uuid');
+var uuid = require('node-uuid');
 var pew_game_engine = require('./game');
 
 // Main Route
@@ -66,8 +66,8 @@ io.on('connection', function (socket) {
     });
 });
 
-server.listen(3000, function(){
-  console.log('SERVER START - Serving on port 3000');
+server.listen(8080, function(){
+  console.log('SERVER START - Serving on port 8080');
   // Server START
   // Setup Game
   pew_game_engine.setupGame();

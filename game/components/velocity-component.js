@@ -1,17 +1,11 @@
-// =============================================================================
-// Author:  Thomas Fuller
-// File:    velocity-component.js
-// =============================================================================
-// Description:
-//
-// =============================================================================
+var component = require('../../lib/entity-component-system/component.js');
 
-// Import base object
-var component = require('./component.js');
-
-// =============================================================================
-// Velocity Component
-// =============================================================================
+/**
+ * 
+ * @param angle
+ * @param speed
+ * @returns {component}
+ */
 var newVelocityComponent = function(angle, speed) {
     var compName = "Velocity";    // Define name of component
     var positionComponent = new component.newComponent(compName);
@@ -23,9 +17,9 @@ var newVelocityComponent = function(angle, speed) {
     positionComponent.data = {
         theta: angle,
         velocity: speed
-    }
+    };
 
     return positionComponent;
-}
+};
 
 module.exports.velocityComponent = newVelocityComponent;

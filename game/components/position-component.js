@@ -1,17 +1,11 @@
-// =============================================================================
-// Author:  Thomas Fuller
-// File:    position-component.js
-// =============================================================================
-// Description:
-//
-// =============================================================================
+var component = require('../../lib/entity-component-system/component.js');
 
-// Import base object
-var component = require('./component.js');
-
-// =============================================================================
-// Position Component
-// =============================================================================
+/**
+ * 
+ * @param x_pos
+ * @param y_pos
+ * @returns {component}
+ */
 var newPositionComponent = function(x_pos, y_pos) {
     var compName = "Position";    // Define name of component
     var positionComponent = new component.newComponent(compName);
@@ -20,9 +14,9 @@ var newPositionComponent = function(x_pos, y_pos) {
     positionComponent.data = {
         x: x_pos,
         y: y_pos
-    }
+    };
 
     return positionComponent;
-}
+};
 
 module.exports.positionComponent = newPositionComponent;

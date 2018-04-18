@@ -1,63 +1,36 @@
-// =============================================================================
-// Author:  Thomas Fuller
-// File:    collision-system.js
-// =============================================================================
-// Description:
-//
-// =============================================================================
+const System = require('/lib/entity-component-system').System;
+const logger = require('/lib/logger');
 
-// Import System base object
-var system = require('../../lib/entity-component-system/system.js');
-
-// =============================================================================
-// Velocity System
-// =============================================================================
-var collision = {};
-
-collision.CollisionSystem = function(game_manager) {
-  var cell_size = 10;
-  var cell_height = game_manager.config_data.universe_height / cell_size;
-  var cell_width = game_manager.config_data.universe_width / cell_size;
-
-  var collisionObj = new system.System("Collision");
-
-  // Initialization of the velocity system
-  collisionObj.init = function() {
-      console.log();
-  }
-
-  // Checks for a collision between multiple entities
-  collisionObj.update = function(name) {
-    if (name.components.Collision.isCollidable) {
-      // Get entities near current entity
-      var x1 = name.components.Position.x;
-      var y1 = name.components.Position.y;
-      var hash_index = game_manager.spatialHashMap.hash(x1,y1);
-      var entities = game_manager.spatialHashMap.getEntitiesNearPlayer(name);
-
-      // Check collisions for all passed in enetities
-      for (entity in entities) {
-        if (entity.components.Collision.isCollidable) {
-          var x2 = entity.components.Position.x;
-          var y2 = entity.components.Position.y;
-
-          // Check collision
-
-        }
-      }
-
-      /*var s = "";
-      for (var i=0; i<cell_size; i++) {
-        for (var j=0; j<cell_size; j++) {
-          s += "["+game_manager.spatialHashMap.hashMap2d[(i*cell_size + j)] + "] ";
-        }
-        s += "\n";
-      }
-      console.log(s);*/
+class CollisionSystem extends System {
+    setup() {
+        this.entitySize = 1;
     }
-  }
 
-  return collisionObj;
+    /**
+     *
+     * @param id
+     * @param entity
+     */
+    update(id, entity) {
+        if (entity.collision.isCollidable) {
+            // Get entities near current entity
+            let x1 = entity.position.x;
+            let y1 = entity.position.y;
+            let entities = this.game.spatialHashMap.getEntitiesNearPlayer(id);
+
+            // Check collisions for all passed in enetities
+            for (let other in entities) {
+                if (other.collision.isCollidable) {
+                    let x2 = other.position.x;
+                    let y2 = other.position.y;
+
+                    let distance = Math.sqrt(Math.pow((x1-x2),2) + Math.pow((y1-y2),2));
+                    if (distance <= this.entitySize)
+                        logger.info('Collision!!!');
+                }
+            }
+        }
+    }
 }
 
-module.exports = collision;
+module.exports = CollisionSystem;

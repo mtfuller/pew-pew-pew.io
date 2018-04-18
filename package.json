@@ -13,6 +13,7 @@
     "express": "3.x",
     "mocha": "^5.1.0",
     "node-uuid": "~1.4.7",
-    "socket.io": "latest"
+    "socket.io": "latest",
+    "winston": "^3.0.0-rc4"
   }
 }

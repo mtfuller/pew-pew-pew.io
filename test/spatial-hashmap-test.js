@@ -3,6 +3,7 @@ const SpatialHashmap = require('./../lib/spatial-hashmap');
 
 chai.should();
 
+// Create test spatial hashmap
 const testHashmap = new SpatialHashmap({
     width: 100,
     height: 100,
@@ -10,6 +11,7 @@ const testHashmap = new SpatialHashmap({
     entitySize: 1,
 });
 
+// Define some test entities
 let entities = [
     {
         id: "abc123",
@@ -21,6 +23,7 @@ let entities = [
     }
 ];
 
+// Define an entity that cannot collide with any object
 let farAwayEntity = {
     id: "ghi789",
     coor: {x: 50, y: 50}

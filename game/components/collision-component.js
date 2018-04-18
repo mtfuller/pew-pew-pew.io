@@ -23,6 +23,6 @@ var newCollisionComponent = function(s, c=true) {
     }
 
     return collisionComponent;
-}
+};
 
 module.exports.collisionComponent = newCollisionComponent;

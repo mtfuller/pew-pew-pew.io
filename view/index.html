@@ -1,153 +1,126 @@
 <html>
-<head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-</head>
-<body>
-<canvas id="myCanvas" height="100%" width="100%" />
-<script src="/socket.io/socket.io.js"></script>
-<script>
-(function() {
-  var canvas = document.getElementById('myCanvas'),
-          context = canvas.getContext('2d');
+    <head>
+        <title>Testing....</title>
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <canvas id="gameWindow" height="100%" width="100%" ></canvas>
+        <script>
+            var id = 0;
 
-  // resize the canvas to fill browser window dynamically
-  window.addEventListener('resize', resizeCanvas, false);
+            var entities = [];
 
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-})();
+            function resizeCanvas() {
+                var canvas = document.getElementById('gameWindow');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            function getMousePos(canvas, evt) {
+                var rect = canvas.getBoundingClientRect();
+                return {
+                    id: id,
+                    x: evt.clientX - rect.left,
+                    y: evt.clientY - rect.top
+                };
+            };
+
+            // Get mouse input
+            function getPlayerInput(evt) {
+                var canvas = document.getElementById('gameWindow');
+                var screen = canvas.getBoundingClientRect();
+                var x = (evt.clientX - screen.left) - (screen.width / 2);
+                var y = (evt.clientY - screen.top) - (screen.height / 2);
+                var new_theta = Math.round(Math.atan2(y,x)*(180/Math.PI));
+                if (new_theta < 0) Math.abs(new_theta += 360);
+                if (new_theta === -0) new_theta = 0;
+                return {
+                    id: id,
+                    theta: new_theta
+                };
+            }
+
+            function renderLoading() {
+                var c=document.getElementById("gameWindow");
+                var ctx=c.getContext("2d");
+                ctx.fillStyle="#000000";
+                ctx.rect(0, 0, canvas.width, canvas.height);
+                ctx.fill();
+                ctx.font = "30px Lucida Console";
+                ctx.fillStyle = "#00FF00";
+                ctx.textAlign = "center";
+                ctx.fillText("Loading...", canvas.width/2, canvas.height/2);
+            }
+
+            // Render
+            function renderGame() {
+                var c=document.getElementById("gameWindow");
+                var ctx=c.getContext("2d");
+                ctx.lineWidth=5;
+                ctx.lineJoin="round";
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle="#000000";
+                ctx.rect(0, 0, canvas.width, canvas.height);
+                ctx.fill();
+                ctx.strokeStyle="#00FF00";
+                for (i = 0; i < entities.length; i++) {
+                    var obj = entities[i];
+                    var theta = obj.theta;
+                    var radius = 35;
+                    var radiansToDegrees = Math.PI / 180.0 ;
+                    var x = obj.x + (canvas.width / 2);
+                    var y = obj.y + (canvas.height / 2);
+
+                    var pointA_x = x + (radius * Math.cos(theta * radiansToDegrees));
+                    var pointA_y = y + (radius * Math.sin(theta * radiansToDegrees));
+
+                    var pointB_x = x + (radius * Math.cos((theta + 140) * radiansToDegrees));
+                    var pointB_y = y + (radius * Math.sin((theta + 140) * radiansToDegrees));
+
+                    var pointC_x = x + (radius * Math.cos((theta + 220) * radiansToDegrees));
+                    var pointC_y = y + (radius * Math.sin((theta + 220) * radiansToDegrees));
+
+                    ctx.beginPath();
+                    ctx.moveTo(pointA_x, pointA_y);
+                    ctx.lineTo(pointB_x, pointB_y);
+                    ctx.lineTo(pointC_x, pointC_y);
+                    ctx.lineTo(pointA_x, pointA_y);
+                    ctx.lineTo(pointB_x, pointB_y);
+                    ctx.stroke();
+                }
+            }
+
+            $(function () {
 
 
-    var id = 0;
+                // resize the canvas to fill browser window dynamically
+                window.addEventListener('resize', resizeCanvas, false);
+                resizeCanvas();
 
-    var entities = [];
+                console.log("Connecting to server...");
+                var socket = io();
+                console.log("Connected. Joining game...");
+                socket.on('join', function(data){
+                    var token = data.token;
+                    console.log("Client has joined game.");
 
-    var canvas = myCanvas;
-    function getMousePos(canvas, evt) {
-        var rect = canvas.getBoundingClientRect();
-        return {
-            id: id,
-            x: evt.clientX - rect.left,
-            y: evt.clientY - rect.top
-        };
-    };
+                    $( "#myCanvas" ).mousemove(function(evt) {
+                        socket.emit('input', {
+                            token: token,
+                            input: getPlayerInput(evt),
+                        });
+                    });
 
+                    socket.on('game_data', function (data) {
+                        entities = data.data;
+                    });
 
-    // connect to game
-    var socket = io.connect('http://localhost:8080/');
-    var hasJoined = false;
-
-    // wait for connected
-    socket.on('connected', function (data) {
-        console.log("Client is connected to server.");
-
-        askToJoin();
-        console.log("Trying to join for a player...");
-
-        socket.on('authenticated', function (data) {
-            hasJoined = true;
-            id = data.id;
-            console.log("Client is authenticated!\nCLIENT ID:"+id);
-
-            $( "#myCanvas" ).mousemove(function(evt) {
-                socket.emit('input', getPlayerInput(canvas, evt));
+                    setInterval(function() {
+                        socket.emit('update', {token: token});
+                    }, 20);
+                });
             });
-
-            socket.on('game_data', function (data) {
-                entities = data.data;
-            });
-
-            setInterval(function() {
-                socket.emit('update', {});
-            }, 20);
-        });
-
-        setInterval(function() {
-          if (hasJoined) {
-            renderGame();
-          } else {
-            renderLoading();
-          }
-        }, 20);
-    });
-
-    // Ask server to play the game
-    function askToJoin() {
-        socket.emit('join', {name: "Test"});
-        setTimeout(function() {
-          if (!hasJoined) {
-            askToJoin();
-          }
-        }, 50);
-    }
-
-    // Get mouse input
-    function getPlayerInput(canvas, evt) {
-      var screen = canvas.getBoundingClientRect();
-      var x = (evt.clientX - screen.left) - (screen.width / 2);
-      var y = (evt.clientY - screen.top) - (screen.height / 2);
-      var new_theta = Math.round(Math.atan2(y,x)*(180/Math.PI));
-      if (new_theta < 0) Math.abs(new_theta += 360);
-      if (new_theta == -0) new_theta = 0;
-      return {
-          id: id,
-          theta: new_theta
-      };
-    }
-
-    function renderLoading() {
-      var c=document.getElementById("myCanvas");
-      var ctx=c.getContext("2d");
-      ctx.fillStyle="#000000";
-      ctx.rect(0, 0, canvas.width, canvas.height);
-      ctx.fill();
-      ctx.font = "30px Lucida Console";
-      ctx.fillStyle = "#00FF00";
-      ctx.textAlign = "center";
-      ctx.fillText("Loading...", canvas.width/2, canvas.height/2);
-    }
-
-    // Render
-    function renderGame() {
-      var c=document.getElementById("myCanvas");
-      var ctx=c.getContext("2d");
-      ctx.lineWidth=5;
-      ctx.lineJoin="round";
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle="#000000";
-      ctx.rect(0, 0, canvas.width, canvas.height);
-      ctx.fill();
-      ctx.strokeStyle="#00FF00";
-      for (i = 0; i < entities.length; i++) {
-          var obj = entities[i];
-          var theta = obj.theta;
-          var radius = 35;
-          var radiansToDegrees = Math.PI / 180.0 ;
-          var x = obj.x + (canvas.width / 2);
-          var y = obj.y + (canvas.height / 2);
-
-          var pointA_x = x + (radius * Math.cos(theta * radiansToDegrees));
-          var pointA_y = y + (radius * Math.sin(theta * radiansToDegrees));
-
-          var pointB_x = x + (radius * Math.cos((theta + 140) * radiansToDegrees));
-          var pointB_y = y + (radius * Math.sin((theta + 140) * radiansToDegrees));
-
-          var pointC_x = x + (radius * Math.cos((theta + 220) * radiansToDegrees));
-          var pointC_y = y + (radius * Math.sin((theta + 220) * radiansToDegrees));
-
-          ctx.beginPath();
-          ctx.moveTo(pointA_x, pointA_y);
-          ctx.lineTo(pointB_x, pointB_y);
-          ctx.lineTo(pointC_x, pointC_y);
-          ctx.lineTo(pointA_x, pointA_y);
-          ctx.lineTo(pointB_x, pointB_y);
-          ctx.stroke();
-      }
-    }
-
-</script>
-</body>
+        </script>
+    </body>
 </html>

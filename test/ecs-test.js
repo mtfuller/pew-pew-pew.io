@@ -1,5 +1,5 @@
 const chai = require('chai');
-const ecs = require('./../lib/entity-component-system');
+const ecs = require('../game/lib/entity-component-system');
 
 chai.should();
 
@@ -40,7 +40,7 @@ class VelocitySystem extends System {
         this.speed = 1;
     }
 
-    update(entity) {
+    update(id, entity) {
         if (entity.life.isAlive) {
             entity.position.x += this.speed;
             entity.position.y -= this.speed;
@@ -59,7 +59,7 @@ class SimpleCollisionSystem extends System {
         this.maxY = 10;
     }
 
-    update(entity) {
+    update(id, entity) {
         if (entity.position.x < this.minX || entity.position.x > this.maxX ||
             entity.position.y < this.minY || entity.position.y > this.maxY) {
             entity.life.isAlive = false;

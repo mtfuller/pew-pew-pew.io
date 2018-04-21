@@ -25,7 +25,7 @@ class Manager {
      * @param system {System}   The System object that is to be added.
      */
     addSystem(system) {
-        system.game = this.game
+        system.game = this.game;
         this.systems.push(system);
     }
 

@@ -1,5 +1,5 @@
 const chai = require('chai');
-const SpatialHashmap = require('./../lib/spatial-hashmap');
+const SpatialHashmap = require('../game/lib/spatial-hashmap');
 
 chai.should();
 

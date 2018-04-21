@@ -1,4 +1,5 @@
-const Component = require('../components');
+const Component = require('./../lib/entity-component-system').Component;
+const Entity = require('./../lib/entity-component-system').Entity;
 
 class Player extends Entity {
     setup() {

@@ -10,7 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "express": "3.x",
+    "jsonwebtoken": "^8.2.1",
     "mocha": "^5.1.0",
     "node-uuid": "~1.4.7",
     "socket.io": "latest",

@@ -1,9 +1,9 @@
-const Manager = require('/lib/entity-component-system');
+const Manager = require('./lib/entity-component-system').Manager;
 const System = require('./systems');
 const Entity = require('./entities');
 
-const SpatialHashmap = require('/lib/spatial-hashmap');
-const logger = require('/lib/logger');
+const SpatialHashmap = require('./lib/spatial-hashmap');
+const logger = require('./../logger');
 
 class Game {
     /**
@@ -25,7 +25,7 @@ class Game {
     run() {
         logger.info('Starting game...');
         this.running = true;
-        update();
+        this.update();
     }
 
     /**
@@ -51,11 +51,14 @@ class Game {
         logger.info("Kicked player...");
     }
 
+    getClientData(uuid) {
+
+    }
+
     /**
      *
      */
     update() {
-        logger.info('Updating game...');
         this.manager.update();
         if (this.running) {
             setTimeout(() => {

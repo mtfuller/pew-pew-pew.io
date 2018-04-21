@@ -1,4 +1,4 @@
-const System = require('/lib/entity-component-system').System;
+const System = require('./../lib/entity-component-system').System;
 
 class VelocitySystem extends System {
   setup() {

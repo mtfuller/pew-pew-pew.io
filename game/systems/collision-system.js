@@ -1,5 +1,5 @@
-const System = require('/lib/entity-component-system').System;
-const logger = require('/lib/logger');
+const System = require('./../lib/entity-component-system').System;
+const logger = require('./../../logger');
 
 class CollisionSystem extends System {
     setup() {

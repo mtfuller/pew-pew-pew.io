@@ -1,60 +1,97 @@
-const app = require('express')();
+// Import settings
+const config = require('./config.json');
+
+// Express and Socket.io Imports
+const express = require('express');
+const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server, {
     'pingInterval': 2000,
     'pingTimeout': 5000
 });
 
+// User Management System
 const UserManager = require('./auth');
-const userManager = new UserManager();
+const userManager = new UserManager(config);
 
+// pew-pew-pew.io Game Engine
 const GameEngine = require('./game');
 const gameEngine = new GameEngine();
 
+// Logger module
 const logger = require('./logger');
 
 
-// Main Route
+
+// Setup express to serve all files in the "public" directory
+app.use('/static', express.static('public'));
+
+// Define the index route, which sends the user the main view to the game
 app.get('/', function(req, res) {
     res.sendfile(__dirname + '/view/index.html');
 });
 
-// Wait for incomming socket to connect
+// Tell Socket.io to wait for any incoming connections
 io.on('connection', function (socket) {
     logger.info("USER CONNECTED");
 
-    // Response that user has been connected
-    userManager.createUser().then(token => {
-        socket.emit('join', {token: token});
-    });
+    // When a user joins, create a new player in the game
+    let player = null;
+    userManager.createUser().then(user => {
+        player = user;
 
-    socket.on('input', function (data) {
-        userManager.verifyUser(data.token).then(payload => {
-            logger.info("Updating player input with id: " + payload.id);
-        }).catch(err => {
-            logger.error("Could not verify token: " + err);
+        // Add a new player to the game, under the given UUID
+        return gameEngine.addPlayer(user.uuid).then(uuid => {
+            logger.info("Added player ("+uuid+") to game.");
+
+            // Send back a "Join" message to the client with their JWT token
+            socket.emit('join', {token: user.token});
         });
-    });
+    }).then(() => {
+        // Tell Socket.io to handle incoming input messages from game clients
+        socket.on('input', function (data) {
+            userManager.verifyUser(data.token).then(payload => {
+                logger.info("Receiving input from player with id: " +
+                    payload.id)
 
-    // When player asks for update
-    socket.on('update', function (data) {
-        userManager.verifyUser(data.token).then(payload => {
-            logger.info("Updating player with id: " + payload.id)
-            //socket.emit('game_data', gameEngine.getClientData(user_id));
-        }).catch(err => {
-            logger.error("Could not verify token: " + err);
+                //TODO: Update player's game entity here
+            }).catch(err => {
+                logger.error("Could not verify token: " + err);
+            });
         });
-    });
 
-    // When User disconnects
-    socket.on('disconnect', function () {
-        socket.emit('disconnected');
-        //pew_game_engine.removeEntity(user_id);
-        logger.info("USER DISCONNECTED");
+        // Set the handler callback, which is called at each tick of the game
+        gameEngine.addOnUpdateHandler(player.uuid, function () {
+            gameEngine.getClientData(player.uuid).then(data => {
+                socket.emit('update', {
+                    token: player.token,
+                    data: data
+                });
+            }).catch(err => {
+                logger.error(err);
+            });
+        });
+
+        // Tell Socket.io how to handle a player disconnecting from the game
+        socket.on('disconnect', function () {
+            socket.emit('disconnected');
+            logger.info("Player ("+uuid+") disconnected...");
+
+            // Remove the player from the game
+            gameEngine.removePlayer(player.uuid).then(uuid => {
+                logger.info("Removed player ("+uuid+") from game...")
+            }).catch(err => {
+                logger.error(err);
+            });
+        });
+    }).catch(err => {
+        // Log any encountered errors
+        logger.error(err);
     });
 });
 
-server.listen(8080, function(){
-    logger.info("Server started on port 8080");
+// Start server on specified port
+server.listen(config.port, function(){
+    logger.info("Server started on port " + config.port);
     gameEngine.run();
 });

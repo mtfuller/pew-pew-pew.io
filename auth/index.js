@@ -1,13 +1,12 @@
 const jwt = require('jsonwebtoken');
 const uuid = require('node-uuid');
-const config = require('./config.json');
 
 class UserManager {
     /**
      * Instantiates a new UserManager object with a secret defined in
      * config.json.
      */
-    constructor() {
+    constructor(config={secret: "DEFAULT_SECRET_123"}) {
         this.secret = config.secret;
     }
 
@@ -24,7 +23,7 @@ class UserManager {
                 let token = jwt.sign({id: userID}, this.secret, {
                     expiresIn: 86400
                 });
-                resolve(token);
+                resolve({uuid: userID, token: token});
             } catch (e) {
                 reject(e);
             }

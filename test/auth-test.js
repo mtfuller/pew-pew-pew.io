@@ -17,4 +17,11 @@ describe("UserManager", function () {
             return userManager.verifyUser(token).should.eventually.be.fulfilled;
         })
     });
+
+    it("should reject an invalid token", function () {
+        return userManager.createUser().then(token => {
+            let invalidToken = "INVALID-TOKEN";
+            return userManager.verifyUser(invalidToken).should.eventually.be.rejected;
+        })
+    });
 });

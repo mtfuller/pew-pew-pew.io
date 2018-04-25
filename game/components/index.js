@@ -1,3 +1,5 @@
+const Component = require('./../lib/entity-component-system').Component;
+
 const Position = Component("position", {
     x: 0,
     y: 0

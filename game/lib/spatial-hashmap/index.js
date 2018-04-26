@@ -53,6 +53,9 @@ class SpatialHashmap {
             y = Math.floor(y / this.cell_height);
         }
 
+        x = x % this.config.cellSize;
+        y = y % this.config.cellSize;
+
         return (y*this.config.cellSize + x);
     }
 
@@ -63,6 +66,7 @@ class SpatialHashmap {
      * @param coor  An object that contains an x and y value (ex. {x:2, y:5});
      */
     addEntity(id, coor) {
+        if (this.hasEntity(id)) return;
         let hashedCoor = this.hash(coor.x, coor.y);
         this.hashMap2d[hashedCoor].push(id);
         this.entities[id] = hashedCoor;
@@ -103,22 +107,25 @@ class SpatialHashmap {
      * @returns {Array.<string>}
      */
     getNearbyEntities(id) {
+        if (!this.hasEntity(id)) return [];
+
         let hashedCoor = this.entities[id];
+
         let nearbyEntities = this.hashMap2d[hashedCoor].slice(0);
         nearbyEntities.splice(nearbyEntities.indexOf(id), 1);
+
         let entityX = (hashedCoor % this.config.cellSize);
-        let entityY = (hashedCoor / this.config.cellSize);
+        let entityY = Math.floor(hashedCoor / this.config.cellSize);
 
         for (let gridIndex = 0; gridIndex < 9; gridIndex++) {
             if (gridIndex === 4) continue;
-
 
             let x = ((Math.floor(gridIndex % 3)) - 1) + entityX;
             let y = ((Math.floor(gridIndex / 3)) - 1) + entityY;
             let entities = this.hashMap2d[this.hash(x, y, false)];
 
             if (entities && entities.length > 0)
-                nearbyEntities.push(entities);
+                nearbyEntities = nearbyEntities.concat(entities);
         }
 
         return nearbyEntities;

@@ -2,9 +2,7 @@ class System {
     /**
      * Initializes the System object by calling the implemented setup() method.
      */
-    constructor() {
-        this.setup();
-    }
+    constructor() {}
 
     /**
      * An "abstract" method to be implemented by a subclass that is called after

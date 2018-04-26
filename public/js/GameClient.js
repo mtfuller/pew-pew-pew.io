@@ -2,9 +2,14 @@ var GameClient = {
     player: {
         uuid: null,
         token: null,
-        theta: 0,
+        position: {x: 0, y: 0},
+        velocity: {magnitude: 0, theta: 0}
     },
     entities: [],
+    gameInfo: {
+        width: 1000,
+        height: 1000
+    },
 
     /**
      *
@@ -14,8 +19,8 @@ var GameClient = {
         this.id = id;
         this.canvas = document.getElementById(this.id);
         this.context = this.canvas.getContext("2d");
-        this.socket = io();
         GameClient.log("Connecting to server...");
+        this.socket = io();
         GameClient.log("Connected.");
     },
 
@@ -37,14 +42,15 @@ var GameClient = {
                 });
             });
 
-            GameClient.socket.on('update', function (data) {
-                GameClient.log("Received game data...");
-                entities = data.data;
+            GameClient.socket.on('update', function (res) {
+                GameClient.player.position = res.player.position;
+                GameClient.entities = res.entities;
+                if (res.entities.length > 0) GameClient.log("FOUND ANOTHER PERSON!!!!");
             });
 
             setInterval(function() {
                 GameClient.renderGame();
-            }, 1000);
+            }, 200);
         });
     },
 
@@ -60,9 +66,9 @@ var GameClient = {
         var new_theta = Math.round(Math.atan2(y,x)*(180/Math.PI));
         if (new_theta < 0) Math.abs(new_theta += 360);
         if (new_theta === -0) new_theta = 0;
-        this.player.theta = new_theta;
+        this.player.velocity.theta = new_theta;
         return {
-            theta: this.player.theta
+            theta: this.player.velocity.theta
         };
     },
 
@@ -70,30 +76,29 @@ var GameClient = {
      *
      */
     renderGame: function() {
-        this.context.lineWidth=5;
-        this.context.lineJoin="round";
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.context.beginPath();
         this.context.fillStyle="#000000";
         this.context.rect(0, 0, this.canvas.width, this.canvas.height);
         this.context.fill();
-        this.context.strokeStyle="#00FF00";
+
         for (i = 0; i < this.entities.length; i++) {
             var entity = this.entities[i];
-            this.drawShip(entity);
+            entity.position.x = this.player.position.x;
+            this.drawShip(this.entities[i]);
         }
-        this.drawShip({
-            x: 0,
-            y: 0,
-            theta: this.player.theta
-        })
+        this.drawShip(this.player);
+        this.drawMinimap();
     },
 
     drawShip: function(obj) {
-        var theta = obj.theta;
-        var radius = 35;
+        var SCALE_FACTOR = 4;
+        var theta = obj.velocity.theta;
+        var radius = 15;
         var radiansToDegrees = Math.PI / 180.0 ;
-        var x = obj.x + (this.canvas.width / 2);
-        var y = obj.y + (this.canvas.height / 2);
+        var x = (obj.position.x - this.player.position.x)*SCALE_FACTOR + (this.canvas.width / 2);
+        var y = (obj.position.y - this.player.position.y)*SCALE_FACTOR + (this.canvas.height / 2);
 
         var pointA_x = x + (radius * Math.cos(theta * radiansToDegrees));
         var pointA_y = y + (radius * Math.sin(theta * radiansToDegrees));
@@ -105,6 +110,9 @@ var GameClient = {
         var pointC_y = y + (radius * Math.sin((theta + 220) * radiansToDegrees));
 
         this.context.beginPath();
+        this.context.lineWidth=2;
+        this.context.lineJoin="round";
+        this.context.strokeStyle="#00FF00";
         this.context.moveTo(pointA_x, pointA_y);
         this.context.lineTo(pointB_x, pointB_y);
         this.context.lineTo(pointC_x, pointC_y);
@@ -113,12 +121,42 @@ var GameClient = {
         this.context.stroke();
     },
 
+
+    drawMinimap: function () {
+        var x = 10,
+            y = 10,
+            w = this.canvas.width*0.3,
+            h = this.canvas.height*0.3;
+        const radius = 2;
+
+        var minimapX = this.player.position.x / this.gameInfo.width;
+        var minimapY = this.player.position.y / this.gameInfo.height;
+
+        this.context.beginPath();
+        this.context.lineWidth=2;
+        this.context.lineJoin="round";
+        this.context.strokeStyle="#00FF00";
+        this.context.rect(x-5, y-5, w+5, h+5);
+        this.context.stroke();
+
+        this.context.beginPath();
+        this.context.fillStyle="#FF0000";
+        this.context.arc(x + w*minimapX, y + h*minimapY, radius, 0, 2 * Math.PI);
+        this.context.fill();
+    },
+
     /**
      *
      * @param string
      */
-    log: function(string) {
+    log: function(obj) {
         var d = new Date();
-        console.log("[" + d.toLocaleString() + "] - DEBUG: " + string)
+        if (typeof obj === 'object') {
+            console.log("[" + d.toLocaleString() + "] - DEBUG: ");
+            console.log(obj);
+        } else {
+            console.log("[" + d.toLocaleString() + "] - DEBUG: " + obj);
+        }
+
     }
 };

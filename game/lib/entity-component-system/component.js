@@ -6,7 +6,12 @@
  * @constructor
  */
 const Component = (name, data) => {
-    return {name: name, data: data};
+    return () => {
+        return {
+            name: name,
+            data: Object.assign({}, data)
+        }
+    };
 };
 
 module.exports = Component;

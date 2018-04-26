@@ -48,7 +48,29 @@ describe("Spatial Hashmap", function () {
 
     it("ignores far away entities", function () {
         testHashmap.addEntity(farAwayEntity.id, farAwayEntity.coor);
-        let nearbyEntities = testHashmap.getNearbyEntities("ghi789");
+        let nearbyEntities = testHashmap.getNearbyEntities(farAwayEntity.id);
         nearbyEntities.should.have.lengthOf(0);
+    });
+
+    it("should return entities in adjacent cells in a single array", function() {
+        let closePlayer = {
+            id: "jkl123",
+            coor: {x: 25, y: 45}
+        };
+        testHashmap.addEntity(closePlayer.id, closePlayer.coor);
+        let nearbyEntities = testHashmap.getNearbyEntities(closePlayer.id);
+        nearbyEntities.should.have.lengthOf(3);
+        nearbyEntities.should.include.members(["abc123","def456","ghi789"]);
+    });
+
+    it("should return entities in adjacent cells by wrapping the border", function() {
+        let closePlayer = {
+            id: "mno456",
+            coor: {x: 95, y: 32}
+        };
+        testHashmap.addEntity(closePlayer.id, closePlayer.coor);
+        let nearbyEntities = testHashmap.getNearbyEntities("abc123");
+        nearbyEntities.should.have.lengthOf(3);
+        nearbyEntities.should.include.members(["def456","jkl123","mno456"]);
     });
 });

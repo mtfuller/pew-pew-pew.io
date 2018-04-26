@@ -27,8 +27,8 @@ const Life = Component("life", {
  */
 class PlayerEntity extends Entity {
     setup() {
-        this.addComponent(Position);
-        this.addComponent(Life);
+        this.addComponent(Position());
+        this.addComponent(Life());
     }
 }
 

@@ -11,8 +11,9 @@ class UserManager {
     }
 
     /**
-     * Returns a promise that, when fulfilled, returns a token that can be used
-     * to authenticate for the new created user.
+     * Returns a promise that, when fulfilled, returns a user object that
+     * contains both the uuid and the token that can be used to authenticate for
+     * the new created user.
      *
      * @returns {Promise}
      */

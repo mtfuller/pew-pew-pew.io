@@ -13,8 +13,8 @@ describe("UserManager", function () {
     });
 
     it("should verify a new user's token", function () {
-        return userManager.createUser().then(token => {
-            return userManager.verifyUser(token).should.eventually.be.fulfilled;
+        return userManager.createUser().then(user => {
+            return userManager.verifyUser(user.token).should.eventually.be.fulfilled;
         })
     });
 

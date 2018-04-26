@@ -26,6 +26,7 @@ class Manager {
      */
     addSystem(system) {
         system.game = this.game;
+        system.setup();
         this.systems.push(system);
     }
 

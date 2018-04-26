@@ -144,13 +144,13 @@ class Game {
             if (!game.players.hasOwnProperty(uuid) || !game.hasPlayer(uuid))
                 reject("Player ("+uuid+") does not exist.");
 
-            let nearbyEntities = game.spatialHashmap
-                .getNearbyEntities(uuid)
+            let otherEntities = game.spatialHashmap
+                .getOtherEntities(uuid)
                 .map(uuid => game.players[uuid].entity);
 
             resolve({
                 player: game.players[uuid].entity,
-                entities: nearbyEntities
+                entities: otherEntities
             });
         });
     }

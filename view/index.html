@@ -9,6 +9,10 @@
         <canvas id="gameWindow" height="100%" width="100%" ></canvas>
         <script src="/static/js/GameClient.js"></script>
         <script>
+            Number.prototype.mod = function(n) {
+                return ((this%n)+n)%n;
+            };
+
             function resizeCanvas() {
                 var canvas = document.getElementById('gameWindow');
                 canvas.width = window.innerWidth;

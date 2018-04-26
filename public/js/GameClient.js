@@ -45,12 +45,11 @@ var GameClient = {
             GameClient.socket.on('update', function (res) {
                 GameClient.player.position = res.player.position;
                 GameClient.entities = res.entities;
-                if (res.entities.length > 0) GameClient.log("FOUND ANOTHER PERSON!!!!");
             });
 
             setInterval(function() {
                 GameClient.renderGame();
-            }, 200);
+            }, 30);
         });
     },
 
@@ -84,8 +83,6 @@ var GameClient = {
         this.context.fill();
 
         for (i = 0; i < this.entities.length; i++) {
-            var entity = this.entities[i];
-            entity.position.x = this.player.position.x;
             this.drawShip(this.entities[i]);
         }
         this.drawShip(this.player);
@@ -97,8 +94,24 @@ var GameClient = {
         var theta = obj.velocity.theta;
         var radius = 15;
         var radiansToDegrees = Math.PI / 180.0 ;
-        var x = (obj.position.x - this.player.position.x)*SCALE_FACTOR + (this.canvas.width / 2);
-        var y = (obj.position.y - this.player.position.y)*SCALE_FACTOR + (this.canvas.height / 2);
+
+        var relX = obj.position.x - this.player.position.x;
+        var relY = obj.position.y - this.player.position.y;
+
+        if (Math.abs(relX) > this.gameInfo.width/2) {
+            relX -= this.gameInfo.width;
+            if (Math.abs(relX) > this.gameInfo.width/2)
+                relX = relX.mod(this.gameInfo.width);
+        }
+
+        if (Math.abs(relY) > this.gameInfo.height/2) {
+            relY -= this.gameInfo.height;
+            if (Math.abs(relY) > this.gameInfo.height/2)
+                relY = relY.mod(this.gameInfo.height);
+        }
+
+        var x = relX*SCALE_FACTOR + (this.canvas.width / 2);
+        var y = relY*SCALE_FACTOR + (this.canvas.height / 2);
 
         var pointA_x = x + (radius * Math.cos(theta * radiansToDegrees));
         var pointA_y = y + (radius * Math.sin(theta * radiansToDegrees));
@@ -112,7 +125,7 @@ var GameClient = {
         this.context.beginPath();
         this.context.lineWidth=2;
         this.context.lineJoin="round";
-        this.context.strokeStyle="#00FF00";
+        this.context.strokeStyle="#FFFFFF";
         this.context.moveTo(pointA_x, pointA_y);
         this.context.lineTo(pointB_x, pointB_y);
         this.context.lineTo(pointC_x, pointC_y);
@@ -125,23 +138,37 @@ var GameClient = {
     drawMinimap: function () {
         var x = 10,
             y = 10,
-            w = this.canvas.width*0.3,
-            h = this.canvas.height*0.3;
-        const radius = 2;
+            h = this.canvas.height*0.3,
+            w = h;
 
-        var minimapX = this.player.position.x / this.gameInfo.width;
-        var minimapY = this.player.position.y / this.gameInfo.height;
+        var playerX = this.player.position.x / this.gameInfo.width;
+        var playerY = this.player.position.y / this.gameInfo.height;
 
         this.context.beginPath();
         this.context.lineWidth=2;
         this.context.lineJoin="round";
-        this.context.strokeStyle="#00FF00";
+        this.context.strokeStyle="#FFFFFF";
         this.context.rect(x-5, y-5, w+5, h+5);
         this.context.stroke();
 
+        this.drawBlip(x + w*playerX, y + h*playerY, true);
+        for (var i = 0; i < this.entities.length; i++) {
+            var entityX = this.entities[i].position.x / this.gameInfo.width;
+            var entityY = this.entities[i].position.y / this.gameInfo.height;
+            this.drawBlip(x + w*entityX, y + h*entityY);
+        }
+
+
+    },
+
+    drawBlip: function(x, y, isPlayer=false) {
+        var radius = 2;
         this.context.beginPath();
-        this.context.fillStyle="#FF0000";
-        this.context.arc(x + w*minimapX, y + h*minimapY, radius, 0, 2 * Math.PI);
+        if (isPlayer)
+            this.context.fillStyle="#00FF00";
+        else
+            this.context.fillStyle="#FF0000";
+        this.context.arc(x, y, radius, 0, 2 * Math.PI);
         this.context.fill();
     },
 

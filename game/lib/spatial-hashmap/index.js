@@ -96,6 +96,7 @@ class SpatialHashmap {
             let hashedCoor = this.entities[id];
             let i = this.hashMap2d[hashedCoor].indexOf(id);
             this.hashMap2d[hashedCoor].splice(i, 1);
+            delete this.entities[id];
             return true;
         } else return false;
     }
@@ -129,6 +130,13 @@ class SpatialHashmap {
         }
 
         return nearbyEntities;
+    }
+
+    getOtherEntities(id) {
+        let entities = Object.keys(this.entities);
+        let otherEntities = entities.slice(0);
+        otherEntities.splice(otherEntities.indexOf(id), 1);
+        return otherEntities;
     }
 }
 

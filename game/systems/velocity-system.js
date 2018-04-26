@@ -15,12 +15,12 @@ class VelocitySystem extends System {
       let old_hash_index = this.game.spatialHashmap.hash(x,y);
 
       // Move entity's x position using their speed and direction
-      entity.position.x += Math.round(entity.velocity.magnitude
-          * Math.cos(entity.velocity.theta * (Math.PI / 180)));
+      entity.position.x += entity.velocity.magnitude
+          * Math.cos(entity.velocity.theta * (Math.PI / 180));
 
       // Move entity's y position using their speed and direction
-      entity.position.y += Math.round(entity.velocity.magnitude
-          * Math.sin(entity.velocity.theta * (Math.PI / 180)));
+      entity.position.y += entity.velocity.magnitude
+          * Math.sin(entity.velocity.theta * (Math.PI / 180));
 
       // If the entity moves past an edge on the map, the entity's position is
       // "wrapped" to the opposite edge. Just like in Astroids.

@@ -17,7 +17,7 @@ const userManager = new UserManager(config);
 // pew-pew-pew.io Game Engine
 const GameEngine = require('./game');
 const gameEngine = new GameEngine({
-    clock: 200,
+    clock: 30,
     worldWidth: 1000,
     worldHeight: 1000
 });

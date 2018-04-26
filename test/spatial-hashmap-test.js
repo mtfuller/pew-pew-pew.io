@@ -73,4 +73,10 @@ describe("Spatial Hashmap", function () {
         nearbyEntities.should.have.lengthOf(3);
         nearbyEntities.should.include.members(["def456","jkl123","mno456"]);
     });
+
+    it("should remove an entity from the hashmap", function() {
+        testHashmap.removeEntity("abc123");
+        Object.keys(testHashmap.entities).should.have.lengthOf(4);
+        Object.keys(testHashmap.entities).should.include.members(["def456","jkl123","ghi789","mno456"]);
+    });
 });

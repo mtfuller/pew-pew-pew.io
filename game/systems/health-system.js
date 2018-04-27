@@ -3,7 +3,7 @@ const logger = require('./../../logger');
 
 class HealthSystem extends System {
     setup() {
-        this.rengerateValue = 5;
+        this.rengerateValue = 0.25;
         this.maxHealth = 100;
     }
 

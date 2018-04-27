@@ -18,7 +18,7 @@ class CollisionSystem extends System {
             let y1 = entity.position.y;
             let entities = this.game.spatialHashmap
                 .getNearbyEntities(id)
-                .map(uuid => this.game.players[uuid].entity);
+                .map(uuid => this.game.entities[uuid]);
 
             // Check collisions for all passed in entities
             for (let other of entities) {
@@ -28,8 +28,19 @@ class CollisionSystem extends System {
 
                     let distance = Math.sqrt(Math.pow((x1-x2),2) + Math.pow((y1-y2),2));
                     if (distance <= this.entitySize) {
-                        if (entity.health) {
-                            entity.health.hp = 0;
+                        if (entity.hasOwnProperty("health")) {
+                            if (other.hasOwnProperty("bullet")) {
+                                entity.health.hp -= 25;
+                                other.bullet.life = 0;
+                                if (entity.health.hp <= 0) {
+                                    this.game.addPlayerScore(other.bullet.player, 100);
+                                } else {
+                                    this.game.addPlayerScore(other.bullet.player, 5);
+                                }
+                            } else {
+                                entity.health.hp = 0;
+                                other.health.hp = 0;
+                            }
                         }
                     }
                 }

@@ -20,11 +20,12 @@ const Health = Component("health", {
 
 const Gun = Component("gun", {
     trigger: false,
-    coolDown: 1000
+    coolDown: 0
 });
 
 const Bullet = Component("bullet", {
-    life: 50
+    life: 50,
+    player: ""
 });
 
 module.exports.Position = Position;
@@ -32,4 +33,4 @@ module.exports.Velocity = Velocity;
 module.exports.Collision = Collision;
 module.exports.Health = Health;
 module.exports.Gun = Gun;
-module.exports.Gun = Bullet;
+module.exports.Bullet = Bullet;

@@ -19,7 +19,8 @@ const GameEngine = require('./game');
 const gameEngine = new GameEngine({
     clock: 30,
     worldWidth: 1000,
-    worldHeight: 1000
+    worldHeight: 1000,
+    maxPlayers: 2
 });
 
 // Logger module
@@ -50,6 +51,9 @@ io.on('connection', function (socket) {
 
             // Send back a "Join" message to the client with their JWT token
             socket.emit('join', {token: user.token});
+        }).catch(err => {
+            logger.error("Cannot add player");
+            logger.error(err);
         });
     }).then(() => {
         // Tell Socket.io to handle incoming input messages from game clients
@@ -66,6 +70,7 @@ io.on('connection', function (socket) {
             gameEngine.getClientData(player.uuid).then(data => {
                 socket.emit('update', {
                     token: player.token,
+                    score: data.score,
                     player: data.player,
                     entities: data.entities
                 });

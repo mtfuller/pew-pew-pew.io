@@ -21,4 +21,4 @@ class Bullet extends Entity {
 }
 
 module.exports.Player = Player;
-module.exports.Player = Bullet;
+module.exports.Bullet = Bullet;

@@ -1,3 +1,5 @@
+const uuid = require('node-uuid');
+
 const Manager = require('./lib/entity-component-system').Manager;
 const System = require('./systems');
 const Player = require('./entities').Player;
@@ -18,6 +20,7 @@ class Game {
         this.worldWidth = config.worldWidth || 1000;
         this.worldHeight = config.worldHeight || 1000;
         this.players = {};
+        this.entities = {};
 
         // Creating new Spatial Hashmap, used for efficient collision checking
         this.spatialHashmap = new SpatialHashmap({
@@ -31,6 +34,7 @@ class Game {
         this.manager.addSystem(new System.CollisionSystem());
         this.manager.addSystem(new System.VelocitySystem());
         this.manager.addSystem(new System.HealthSystem());
+        this.manager.addSystem(new System.ShootingSystem());
     }
 
     /**
@@ -67,6 +71,10 @@ class Game {
         this.running = false;
     }
 
+    hasPlayer(uuid) {
+        return this.players.hasOwnProperty(uuid);
+    }
+
     /**
      *
      * @param uuid
@@ -89,17 +97,13 @@ class Game {
             });
 
             game.players[uuid] = {
+                score: 0,
                 entity: playerEntity
             };
+            game.addEntity(playerEntity, uuid);
 
-            game.spatialHashmap.addEntity(uuid, playerEntity.position);
-            game.manager.addEntity(uuid, playerEntity);
             resolve(uuid);
         });
-    }
-
-    hasPlayer(id) {
-        return this.players.hasOwnProperty(id);
     }
 
     /**
@@ -121,12 +125,36 @@ class Game {
 
             delete game.players[uuid];
             if (lose) lose();
-
-            game.spatialHashmap.removeEntity(uuid);
-            game.manager.removeEntity(uuid);
+            game.removeEntity(uuid);
 
             resolve(uuid);
         });
+    }
+
+    addEntity(entity, id=uuid.v1()) {
+        this.entities[id] = entity;
+        this.spatialHashmap.addEntity(id, entity.position);
+        this.manager.addEntity(id, entity);
+    }
+
+    removeEntity(entityId) {
+        delete this.entities[entityId];
+        this.spatialHashmap.removeEntity(entityId);
+        this.manager.removeEntity(entityId);
+    }
+
+    getPlayerScore(uuid) {
+        if (this.hasPlayer(uuid)) {
+            return this.players[uuid].score;
+        } else {
+            return null;
+        }
+    }
+
+    addPlayerScore(uuid, points) {
+        if (this.hasPlayer(uuid)) {
+            this.players[uuid].score += points;
+        }
     }
 
     /**
@@ -143,6 +171,10 @@ class Game {
                 let theta = input.theta;
                 if (theta < 0 || theta > 360) reject("Theta value is invalid.");
                 this.players[uuid].entity.velocity.theta = theta;
+            }
+
+            if (input.hasOwnProperty("trigger") && typeof(input.trigger) === "boolean") {
+                this.players[uuid].entity.gun.trigger = input.trigger;
             }
 
             resolve(uuid);
@@ -170,9 +202,10 @@ class Game {
 
             let otherEntities = game.spatialHashmap
                 .getOtherEntities(uuid)
-                .map(uuid => game.players[uuid].entity);
+                .map(uuid => game.entities[uuid]);
 
             resolve({
+                score: game.getPlayerScore(uuid),
                 player: game.players[uuid].entity,
                 entities: otherEntities
             });
@@ -190,7 +223,7 @@ class Game {
      *
      */
     isGameFull(){
-        return this.players.length >= this.maxPlayers;
+        return Object.keys(this.players).length >= this.maxPlayers;
     }
 
     /**

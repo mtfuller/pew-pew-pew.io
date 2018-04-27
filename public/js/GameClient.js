@@ -2,13 +2,15 @@ var GameClient = {
     player: {
         uuid: null,
         token: null,
+        alive: true,
         position: {x: 0, y: 0},
-        velocity: {magnitude: 0, theta: 0}
+        velocity: {magnitude: 0, theta: 0},
+        control: {theta: 0}
     },
     entities: [],
     gameInfo: {
         width: 1000,
-        height: 1000
+        height: 1000,
     },
 
     /**
@@ -35,21 +37,32 @@ var GameClient = {
 
             GameClient.log(GameClient.id);
             $("#"+GameClient.id).mousemove(function(evt) {
-                GameClient.log("Sending input...");
-                GameClient.socket.emit('input', {
-                    token: GameClient.player.token,
-                    input: GameClient.getPlayerInput(evt),
-                });
+                if (GameClient.player.alive) {
+                    GameClient.log("Sending input...");
+                    GameClient.socket.emit('input', {
+                        token: GameClient.player.token,
+                        input: GameClient.getPlayerInput(evt),
+                    });
+                }
             });
 
             GameClient.socket.on('update', function (res) {
                 GameClient.player.position = res.player.position;
+                GameClient.player.velocity = res.player.velocity;
                 GameClient.entities = res.entities;
             });
 
-            setInterval(function() {
-                GameClient.renderGame();
-            }, 30);
+            GameClient.socket.on('game_over', function (res) {
+                GameClient.player.alive = false;
+                GameClient.socket.close(true);
+                setTimeout(function() {
+                    GameClient.player.alive = true;
+                    GameClient.socket = io();
+                    GameClient.run();
+                }, 5000);
+            });
+
+            GameClient.renderGame();
         });
     },
 
@@ -65,9 +78,9 @@ var GameClient = {
         var new_theta = Math.round(Math.atan2(y,x)*(180/Math.PI));
         if (new_theta < 0) Math.abs(new_theta += 360);
         if (new_theta === -0) new_theta = 0;
-        this.player.velocity.theta = new_theta;
+        this.player.control.theta = new_theta;
         return {
-            theta: this.player.velocity.theta
+            theta: this.player.control.theta
         };
     },
 
@@ -87,8 +100,21 @@ var GameClient = {
         }
         this.drawShip(this.player);
         this.drawMinimap();
+
+        var game = this;
+
+        setTimeout(function() {
+            if (game.player.alive)
+                GameClient.renderGame();
+            else
+                GameClient.drawGameOver();
+        }, 30);
     },
 
+    /**
+     *
+     * @param obj
+     */
     drawShip: function(obj) {
         var SCALE_FACTOR = 4;
         var theta = obj.velocity.theta;
@@ -134,7 +160,9 @@ var GameClient = {
         this.context.stroke();
     },
 
-
+    /**
+     *
+     */
     drawMinimap: function () {
         var x = 10,
             y = 10,
@@ -161,6 +189,12 @@ var GameClient = {
 
     },
 
+    /**
+     *
+     * @param x
+     * @param y
+     * @param isPlayer
+     */
     drawBlip: function(x, y, isPlayer=false) {
         var radius = 2;
         this.context.beginPath();
@@ -174,7 +208,19 @@ var GameClient = {
 
     /**
      *
-     * @param string
+     */
+    drawGameOver() {
+        this.context.font = "36px Monospace";
+        this.context.fillStyle = "#00FF00";
+        this.context.textAlign = "center";
+        this.context.fillText("GAME OVER", this.canvas.width/2, this.canvas.height/2);
+        this.context.font = "14px Monospace";
+        this.context.fillText("Rejoining game...", this.canvas.width/2, (this.canvas.height/2)+40);
+    },
+
+    /**
+     *
+     * @param obj
      */
     log: function(obj) {
         var d = new Date();

@@ -74,6 +74,12 @@ io.on('connection', function (socket) {
             });
         });
 
+        // Set the handler callback, which is called at each tick of the game
+        gameEngine.addPlayerLoseHandler(player.uuid, function () {
+            socket.emit("game_over", {});
+            socket.disconnect(true);
+        });
+
         // Tell Socket.io how to handle a player disconnecting from the game
         socket.on('disconnect', function () {
             socket.emit('disconnected');

@@ -30,10 +30,25 @@ class Game {
         this.manager = new Manager(this);
         this.manager.addSystem(new System.CollisionSystem());
         this.manager.addSystem(new System.VelocitySystem());
+        this.manager.addSystem(new System.HealthSystem());
     }
 
+    /**
+     *
+     * @param uuid
+     * @param func
+     */
     addOnUpdateHandler(uuid, func) {
         this.players[uuid].update = func;
+    }
+
+    /**
+     *
+     * @param uuid
+     * @param func
+     */
+    addPlayerLoseHandler(uuid, func) {
+        this.players[uuid].lose = func;
     }
 
     /**
@@ -64,8 +79,8 @@ class Game {
 
             let playerEntity = new Player({
                 position: {
-                    x: 50,// + Math.floor(Math.random() * 10),
-                    y: 50 //+ Math.floor(Math.random() * 10)
+                    x: Math.floor(Math.random() * this.worldWidth),
+                    y: Math.floor(Math.random() * this.worldHeight)
                 },
                 velocity: {
                     magnitude: 1,
@@ -95,12 +110,21 @@ class Game {
     removePlayer(uuid) {
         let game = this;
         return new Promise((resolve, reject) => {
-            if (!game.players.hasOwnProperty(uuid))
+            if (!game.hasPlayer(uuid))
                 reject("Can't remove player. Player ("+uuid+") does not " +
                     "exist.");
+
+
+            let lose = null;
+            if (game.players[uuid].hasOwnProperty("lose"))
+                lose = game.players[uuid].lose;
+
             delete game.players[uuid];
+            if (lose) lose();
+
             game.spatialHashmap.removeEntity(uuid);
             game.manager.removeEntity(uuid);
+
             resolve(uuid);
         });
     }

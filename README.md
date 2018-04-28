@@ -1,47 +1,38 @@
 # Pew-Pew-Pew.io
+![demo](https://raw.githubusercontent.com/mtfuller/pew-pew-pew.io/master/docs/img/demo.gif "pew-pew-pew.io Demo")
 
 ## Overview
-
 Pew-Pew-Pew.io is a web-based game that can be played in your browser, following in the spirit of other browser games, like agar.io, diep.io, and slither.io.
 
 These types of web games are extremely popular for their simplicity and fast-paced action. A type of “just drop in and play” experience.
 
-### Goal:
-The goal of this project is to create a browser-based game mirroring the basic gameplay of the classic arcade game, Asteroid.
+## Features
+Here are just some of the features that have been completed thus far:
++ Players are able to join a game.
++ Players can move their mouse and click to move their ship and fire their weapon!
++ Players have regenerative health.
++ Players get points when their bullets hit an enemy ship and when they destroy a ship.
++ Collision system kills players that crash into each other.
++ Server can be configured to allow only a certain amount of players in a game.
+
+
+## Architecture and Design
+
+Pew-pew-pew.io uses a client/server architecture to facilitate the multiplayer game. It makes use of express.js to serve the game view (`index.html`) and the game client script (`GameClient.js`). Socket.io handles the real-time, client/server messaging.
+
+![architecture](https://raw.githubusercontent.com/mtfuller/pew-pew-pew.io/master/docs/img/architecture.png "pew-pew-pew.io Architecture")
+
+In terms of the design for the actual game, I implemented a simple Entity Component System (ECS) framework in JavaScript. When the server launches it creates a new `Game` instance which manages players as well as several ECS systems (e.g. `CollisionSystem`, `HealthSystem`, etc.). 
+
+The `Game` instance also makes use of a `SpatialHashmap` that employs simply spatial hashing for more efficient collision detection.
 
 ## Installation
+#### Download repository
+To download the repo, simply run
+`git clone https://github.com/mtfuller/pew-pew-pew.io.git`.
 
-#### Dependencies:
-+ Node.js - Web server
-+ express.js - Web framework
-+ socket.io - Quick, real-time client/server communication.
+#### Install Dependencies
+Pew-pew-pew.io makes use of several packages to facilitate client/server communication, logging, JWT generation, etc. To install all dependencies, run `npm install` within the `/pew-pew-pew.io` directory.
 
-Currently, all source code is used in the same root directory where server.js is located. No steps or dependencies have been documented yet.
-
-## Milestones
-
-### Milestone 1: "Space Explorer"
-
-Create a server that is able to receive players and be able to move/orient their ships in real time. Here are some main objectives:
-+ Create basic server that receives clients requests to join, move their ship, orient their ship, and leave.
-+ Create the basic client code to display the proper game objects sent.
-+ Create the foundational, real-time communication between client and server.
-
-### Milestone 2: “Simple Space Battle”
-
-Build on the previous client/server system, but this time add some more game functionality (health, shooting). Here are some main objectives:
-+ Add extra game rules, like health/death, shooting, "physical space" (ships cannot occupy the same space).
-
-### Milestone 3: “Full Asteroids”
-
-Build on the previous system, add asteroids into the mix along with other improvements. Some added functionality:
-
-+ Asteroids, duh...
-+ The 3-stage asteroid system (smaller asteroids spawn after asteroid is destroyed).
-
-### Milestone 4: “Modded Space Wars”
-
-Finalize the system by adding an easy way to add mods to change and alter the functionality, like team battles, different skins, etc. Some added functionality:
-
-+ Add an easy way for developers to add scripts, configurations, etc. to a server game.
-+ Allow system to be EASILY deployed to any server with the right requirements.
+#### Running the Server
+Before running the server, you can modify the `config.json` file if you feel you need to change the maximum number of players or port. To run the server simply run `node app.js`;

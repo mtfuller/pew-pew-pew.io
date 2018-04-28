@@ -1,4 +1,8 @@
 {
   "port": 8080,
+  "clock": 30,
+  "worldWidth": 1000,
+  "worldHeight": 1000,
+  "maxPlayers": 10,
   "secret": "<PLEASE CREATE A NEW SECRET HERE>"
 }

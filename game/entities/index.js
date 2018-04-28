@@ -1,6 +1,10 @@
 const Component = require('./../components');
 const Entity = require('./../lib/entity-component-system').Entity;
 
+/**
+ * Defining the Player entity. Players have a position/velocity in the world, as
+ * well as an ammount of health that keeps them alive in the world.
+ */
 class Player extends Entity {
     setup() {
         this.addComponent(Component.Position());
@@ -11,6 +15,10 @@ class Player extends Entity {
     }
 }
 
+/**
+ * Defining the Bullet entity. Bullets have a position/velocity in the world,
+ * but will eventually despawn after a certain amount of time.
+ */
 class Bullet extends Entity {
     setup() {
         this.addComponent(Component.Position());

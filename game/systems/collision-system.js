@@ -1,15 +1,25 @@
 const System = require('./../lib/entity-component-system').System;
 const logger = require('./../../logger');
 
+/**
+ * The CollisionSystem is a system in the ECS that continously checks for
+ * collision among entities in the world. The CollisionSystem utilizes the
+ * SpatialHashmap for more efficient collision detection.
+ */
 class CollisionSystem extends System {
+    /**
+     * The setup function that is run at instantiation.
+     */
     setup() {
         this.entitySize = 8;
     }
 
     /**
+     * Updates the given entity. Specifically, the collision system will check
+     * to see if the given entity is colliding with any other entities.
      *
-     * @param id
-     * @param entity
+     * @param id        The ID of the entity to update.
+     * @param entity    The object of the entity to update.
      */
     update(id, entity) {
         if (entity.collision.isCollidable) {

@@ -2,7 +2,14 @@ const System = require('./../lib/entity-component-system').System;
 const Bullet = require('./../entities').Bullet;
 const logger = require('./../../logger');
 
+/**
+ * The ShootingSystem is a system in the ECS that continuously manages players'
+ * guns, as well as spawning and removing bullets.
+ */
 class ShootingSystem extends System {
+    /**
+     * The setup() function that is called during instantiation.
+     */
     setup() {
         this.maxBulletLifespan = 200;
         this.bulletDecayRate = 1;
@@ -11,6 +18,9 @@ class ShootingSystem extends System {
     }
 
     /**
+     * Updates the given entity. Specifically, the shooting system checks if a
+     * player wants to shoot and if their gun's cool down has reached 0.
+     * The function also spawns and removes bullet entities.
      *
      * @param id
      * @param entity

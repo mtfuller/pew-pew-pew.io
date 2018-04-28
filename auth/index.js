@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 const uuid = require('node-uuid');
 
+/**
+ * This class interfaces with the JWT module in order to create JWT tokens to
+ * allow clients to update their ship securely.
+ */
 class UserManager {
     /**
      * Instantiates a new UserManager object with a secret defined in

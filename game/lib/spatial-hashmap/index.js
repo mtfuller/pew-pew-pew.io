@@ -132,6 +132,13 @@ class SpatialHashmap {
         return nearbyEntities;
     }
 
+    /**
+     * Returns an array of all entities, except for the entity whose id matches
+     * the given id.
+     *
+     * @param id    The id of the entity to exclude from the returned array.
+     * @returns {Array.<*>}
+     */
     getOtherEntities(id) {
         let entities = Object.keys(this.entities);
         let otherEntities = entities.slice(0);

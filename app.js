@@ -10,6 +10,9 @@ const io = require('socket.io')(server, {
     'pingTimeout': 5000
 });
 
+// Setup express to serve all files in the "public" directory
+app.use('/static', express.static('public'));
+
 // User Management System
 const UserManager = require('./auth');
 const userManager = new UserManager(config);
@@ -17,27 +20,16 @@ const userManager = new UserManager(config);
 // pew-pew-pew.io Game Engine
 const GameEngine = require('./game');
 const gameEngine = new GameEngine({
-    clock: 30,
-    worldWidth: 1000,
-    worldHeight: 1000,
-    maxPlayers: 2
+    clock: config.clock,
+    worldWidth: config.worldWidth,
+    worldHeight: config.worldHeight,
+    maxPlayers: config.maxPlayers
 });
 
 // Logger module
 const logger = require('./logger');
 
-// Setup express to serve all files in the "public" directory
-app.use('/static', express.static('public'));
-
-// Define the index route, which sends the user the main view to the game
-app.get('/', function(req, res) {
-    res.sendfile(__dirname + '/view/index.html');
-});
-
-// Tell Socket.io to wait for any incoming connections
-io.on('connection', function (socket) {
-    logger.info("User connected...");
-
+function joinGame(socket) {
     // When a user joins, create a new player in the game
     let player = null;
     userManager.createUser().then(user => {
@@ -45,18 +37,19 @@ io.on('connection', function (socket) {
 
         // Add a new player to the game, under the given UUID
         logger.info("New player joining...");
-        return gameEngine.addPlayer(user.uuid).then(uuid => {
-            logger.info("Added player ("+uuid+") to game.");
-            logger.info("Current players: " + gameEngine.getNumberOfPlayers());
+        return gameEngine.addPlayer(player.uuid);
+    }, err => {
+        logger.error("COULD NOT CREATE USER");
+        return Promise.reject(err);
+    }).then(uuid => {
+        logger.info("Added player (" + uuid + ") to game.");
+        logger.info("Current players: " + gameEngine.getNumberOfPlayers());
 
-            // Send back a "Join" message to the client with their JWT token
-            socket.emit('join', {token: user.token});
-        }).catch(err => {
-            logger.error("Cannot add player");
-            logger.error(err);
-        });
-    }).then(() => {
-        // Tell Socket.io to handle incoming input messages from game clients
+        // Send back a "Join" message to the client with their JWT token
+        socket.emit('join', {token: player.token});
+
+        // Tell Socket.io to receive input messages from client to control their
+        // ship
         socket.on('input', function (data) {
             userManager.verifyUser(data.token).then(decoded => {
                 return gameEngine.updatePlayer(decoded.id, data.input);
@@ -97,10 +90,21 @@ io.on('connection', function (socket) {
                 logger.error(err);
             });
         });
-    }).catch(err => {
-        // Log any encountered errors
+    }, err => {
         logger.error(err);
+        socket.emit('game_full', {});
     });
+}
+
+// Define the index route, which sends the user the main view to the game
+app.get('/', function(req, res) {
+    res.sendfile(__dirname + '/view/index.html');
+});
+
+// Tell Socket.io to wait for any incoming connections
+io.on('connection', function (socket) {
+    logger.info("User connected...");
+    joinGame(socket);
 });
 
 // Start server on specified port
